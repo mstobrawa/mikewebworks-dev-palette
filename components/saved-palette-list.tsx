@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Trash2 } from "lucide-react";
+import { CheckCircle2, Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Modal } from "@/components/modal";
 import type { PaletteRecord } from "@/types/palette";
 import { formatDate } from "@/lib/utils";
 
@@ -10,18 +12,39 @@ type SavedPaletteListProps = {
 };
 
 export function SavedPaletteList({ initialPalettes }: SavedPaletteListProps) {
+  const router = useRouter();
   const [palettes, setPalettes] = useState(initialPalettes);
   const [isPending, startTransition] = useTransition();
+  const [paletteToDelete, setPaletteToDelete] = useState<PaletteRecord | null>(null);
+  const [notice, setNotice] = useState<{ title: string; description: string } | null>(null);
 
-  function handleDelete(id: string) {
+  function handleDelete() {
+    if (!paletteToDelete) {
+      return;
+    }
+
     startTransition(async () => {
-      const response = await fetch(`/api/palettes/${id}`, {
+      const response = await fetch(`/api/palettes/${paletteToDelete.id}`, {
         method: "DELETE"
       });
 
+      const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+
       if (response.ok) {
-        setPalettes((current) => current.filter((item) => item.id !== id));
+        setPalettes((current) => current.filter((item) => item.id !== paletteToDelete.id));
+        setPaletteToDelete(null);
+        router.refresh();
+        setNotice({
+          title: "Palette deleted",
+          description: `"${paletteToDelete.name}" was removed from Supabase and your dashboard.`,
+        });
+        return;
       }
+
+      setNotice({
+        title: "Delete failed",
+        description: payload?.error ?? "The palette could not be deleted. Try again.",
+      });
     });
   }
 
@@ -45,7 +68,7 @@ export function SavedPaletteList({ initialPalettes }: SavedPaletteListProps) {
             <button
               type="button"
               disabled={isPending}
-              onClick={() => handleDelete(palette.id)}
+              onClick={() => setPaletteToDelete(palette)}
               className="inline-flex items-center gap-2 rounded-full border border-white/10 px-4 py-2 text-sm text-muted transition hover:border-rose-300/20 hover:text-rose-200 disabled:opacity-60"
             >
               <Trash2 className="h-4 w-4" />
@@ -65,6 +88,50 @@ export function SavedPaletteList({ initialPalettes }: SavedPaletteListProps) {
           </div>
         </article>
       ))}
+
+      <Modal
+        open={Boolean(paletteToDelete)}
+        onClose={() => {
+          if (!isPending) {
+            setPaletteToDelete(null);
+          }
+        }}
+        canClose={!isPending}
+        title="Delete saved palette"
+        description={
+          paletteToDelete
+            ? `Delete "${paletteToDelete.name}" from your dashboard and Supabase storage?`
+            : undefined
+        }
+        icon={<Trash2 className="h-5 w-5" />}
+      >
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <button
+            type="button"
+            onClick={handleDelete}
+            disabled={isPending}
+            className="inline-flex flex-1 items-center justify-center rounded-full bg-rose-500 px-5 py-3 text-sm font-medium text-white transition hover:bg-rose-400 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {isPending ? "Deleting..." : "Delete palette"}
+          </button>
+          <button
+            type="button"
+            onClick={() => setPaletteToDelete(null)}
+            disabled={isPending}
+            className="inline-flex items-center justify-center rounded-full border border-white/10 px-5 py-3 text-sm text-muted transition hover:border-white/20 hover:text-ink disabled:opacity-60"
+          >
+            Cancel
+          </button>
+        </div>
+      </Modal>
+
+      <Modal
+        open={Boolean(notice)}
+        onClose={() => setNotice(null)}
+        title={notice?.title ?? ""}
+        description={notice?.description}
+        icon={<CheckCircle2 className="h-5 w-5" />}
+      />
     </div>
   );
 }

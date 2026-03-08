@@ -5,12 +5,12 @@ import {
   useEffect,
   useMemo,
   useState,
-  useTransition,
 } from "react";
-import { History, Link2, Save } from "lucide-react";
+import { CheckCircle2, History, Link2, Save } from "lucide-react";
 import { ExportPanel } from "@/components/export-panel";
 import { GenerateButton } from "@/components/generate-button";
 import { HarmonySelector } from "@/components/harmony-selector";
+import { Modal } from "@/components/modal";
 import { PaletteCard } from "@/components/palette-card";
 import { UIPreview } from "@/components/ui-preview";
 import { generatePalette, paletteToSearchParam } from "@/lib/palette";
@@ -25,7 +25,11 @@ export function PaletteStudio({ initialPalette, canSave }: PaletteStudioProps) {
   const [mode, setMode] = useState<HarmonyMode>("random");
   const [palette, setPalette] = useState(initialPalette);
   const [history, setHistory] = useState<Palette[]>([initialPalette]);
-  const [isPending, startTransition] = useTransition();
+  const [isSaving, setIsSaving] = useState(false);
+  const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
+  const [saveName, setSaveName] = useState(`Palette ${new Date().toLocaleDateString()}`);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<{ title: string; description: string } | null>(null);
   const deferredPalette = useDeferredValue(palette);
   const paletteEntries = useMemo(
     () => Object.entries(deferredPalette),
@@ -62,33 +66,50 @@ export function PaletteStudio({ initialPalette, canSave }: PaletteStudioProps) {
     navigator.clipboard.writeText(window.location.href);
   }
 
-  function handleSave() {
-    startTransition(async () => {
-      const name = window.prompt(
-        "Palette name",
-        `Palette ${new Date().toLocaleDateString()}`,
-      );
-      if (!name) return;
+  function openSaveModal() {
+    setSaveError(null);
+    setSaveName(`Palette ${new Date().toLocaleDateString()}`);
+    setIsSaveModalOpen(true);
+  }
 
-      const response = await fetch("/api/palettes", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ name, colors: palette }),
-      });
+  function closeSaveModal() {
+    if (isSaving) return;
+    setIsSaveModalOpen(false);
+  }
 
-      if (response.status === 401) {
-        window.alert("Sign in to save palettes.");
-        return;
-      }
+  async function handleSave() {
+    if (!saveName.trim()) {
+      setSaveError("Give this palette a name before saving it.");
+      return;
+    }
 
-      if (!response.ok) {
-        window.alert("Saving failed. Check your Supabase configuration.");
-        return;
-      }
+    setIsSaving(true);
+    setSaveError(null);
 
-      window.alert("Palette saved.");
+    const response = await fetch("/api/palettes", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ name: saveName.trim(), colors: palette }),
+    });
+
+    setIsSaving(false);
+
+    if (response.status === 401) {
+      setSaveError("Sign in to save palettes.");
+      return;
+    }
+
+    if (!response.ok) {
+      setSaveError("Saving failed. Check your Supabase configuration.");
+      return;
+    }
+
+    setIsSaveModalOpen(false);
+    setNotice({
+      title: "Palette saved",
+      description: `"${saveName.trim()}" has been stored in Supabase and is ready in your dashboard.`,
     });
   }
 
@@ -120,8 +141,8 @@ export function PaletteStudio({ initialPalette, canSave }: PaletteStudioProps) {
             </button>
             <button
               type="button"
-              onClick={handleSave}
-              disabled={!canSave || isPending}
+              onClick={openSaveModal}
+              disabled={!canSave || isSaving}
               className="inline-flex items-center justify-center gap-2 rounded-full border border-white/10 px-4 py-3 text-sm text-muted transition hover:border-white/20 hover:text-ink disabled:cursor-not-allowed disabled:opacity-50"
             >
               <Save className="h-4 w-4" />
@@ -175,6 +196,68 @@ export function PaletteStudio({ initialPalette, canSave }: PaletteStudioProps) {
           </section>
         </div>
       </div>
+
+      <Modal
+        open={isSaveModalOpen}
+        onClose={closeSaveModal}
+        canClose={!isSaving}
+        title="Save palette"
+        description="Name this palette before saving it to your Supabase dashboard."
+        icon={<Save className="h-5 w-5" />}
+      >
+        <form
+          className="space-y-4"
+          onSubmit={(event) => {
+            event.preventDefault();
+            void handleSave();
+          }}
+        >
+          <label className="block">
+            <span className="mb-2 block text-sm text-ink">Palette name</span>
+            <input
+              type="text"
+              value={saveName}
+              onChange={(event) => setSaveName(event.target.value)}
+              placeholder="Spring launch palette"
+              required
+              autoFocus
+              className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-ink outline-none transition placeholder:text-muted focus:border-cyan-200/50 focus:bg-white/10"
+            />
+          </label>
+
+          {saveError ? (
+            <p className="rounded-2xl border border-rose-400/20 bg-rose-400/10 px-4 py-3 text-sm text-rose-100">
+              {saveError}
+            </p>
+          ) : null}
+
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <button
+              type="submit"
+              disabled={isSaving}
+              className="inline-flex flex-1 items-center justify-center rounded-full bg-ink px-5 py-3 text-sm font-medium text-canvas transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {isSaving ? "Saving..." : "Save palette"}
+            </button>
+            <button
+              type="button"
+              onClick={closeSaveModal}
+              disabled={isSaving}
+              className="inline-flex items-center justify-center rounded-full border border-white/10 px-5 py-3 text-sm text-muted transition hover:border-white/20 hover:text-ink disabled:opacity-60"
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+      </Modal>
+
+      <Modal
+        open={Boolean(notice)}
+        onClose={() => setNotice(null)}
+        title={notice?.title ?? ""}
+        description={notice?.description}
+        icon={<CheckCircle2 className="h-5 w-5" />}
+      />
     </div>
   );
 }

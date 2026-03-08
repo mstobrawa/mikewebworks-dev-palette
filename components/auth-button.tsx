@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { LogIn, LogOut, Mail, X } from "lucide-react";
+import { LogIn, LogOut, Mail } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { Modal } from "@/components/modal";
 
 export function AuthButton() {
   const supabase = createClient();
@@ -135,97 +136,69 @@ export function AuthButton() {
         </button>
       )}
 
-      {isModalOpen ? (
-        <div
-          className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur-md"
-          onClick={closeModal}
+      <Modal
+        open={isModalOpen}
+        onClose={closeModal}
+        canClose={!loading}
+        title="Sign in with a magic link"
+        description="Enter your email and we'll send you a secure sign-in link that opens your dashboard."
+        icon={<Mail className="h-5 w-5" />}
+      >
+        <p className="text-xs uppercase tracking-[0.3em] text-cyan-100/80">
+          Supabase Auth
+        </p>
+
+        <form
+          className="mt-4 space-y-4"
+          onSubmit={(event) => {
+            event.preventDefault();
+            void signIn();
+          }}
         >
-          <div
-            className="w-full max-w-md rounded-[2rem] border border-white/10 bg-[#0b1222]/95 p-6 shadow-panel"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <div className="flex items-start justify-between gap-4">
-              <div className="space-y-3">
-                <div className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-cyan-300/20 bg-cyan-300/10 text-cyan-100">
-                  <Mail className="h-5 w-5" />
-                </div>
-                <div>
-                  <p className="text-xs uppercase tracking-[0.3em] text-cyan-100/80">
-                    Supabase Auth
-                  </p>
-                  <h2 className="mt-2 text-2xl font-semibold text-ink">
-                    Sign in with a magic link
-                  </h2>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={closeModal}
-                disabled={loading}
-                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 text-muted transition hover:border-white/20 hover:text-ink disabled:opacity-50"
-                aria-label="Close sign-in modal"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
+          <label className="block">
+            <span className="mb-2 block text-sm text-ink">Email address</span>
+            <input
+              type="email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              placeholder="you@company.com"
+              required
+              autoFocus
+              className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-ink outline-none transition placeholder:text-muted focus:border-cyan-200/50 focus:bg-white/10"
+            />
+          </label>
 
-            <p className="mt-4 text-sm leading-7 text-muted">
-              Enter your email and we&apos;ll send you a secure sign-in link that opens your dashboard.
+          {error ? (
+            <p className="rounded-2xl border border-rose-400/20 bg-rose-400/10 px-4 py-3 text-sm text-rose-100">
+              {error}
             </p>
+          ) : null}
 
-            <form
-              className="mt-6 space-y-4"
-              onSubmit={(event) => {
-                event.preventDefault();
-                void signIn();
-              }}
+          {feedback ? (
+            <p className="rounded-2xl border border-cyan-300/20 bg-cyan-300/10 px-4 py-3 text-sm text-cyan-100">
+              {feedback}
+            </p>
+          ) : null}
+
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <button
+              type="submit"
+              disabled={loading}
+              className="inline-flex flex-1 items-center justify-center rounded-full bg-ink px-5 py-3 text-sm font-medium text-canvas transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              <label className="block">
-                <span className="mb-2 block text-sm text-ink">Email address</span>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(event) => setEmail(event.target.value)}
-                  placeholder="you@company.com"
-                  required
-                  autoFocus
-                  className="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-ink outline-none transition placeholder:text-muted focus:border-cyan-200/50 focus:bg-white/10"
-                />
-              </label>
-
-              {error ? (
-                <p className="rounded-2xl border border-rose-400/20 bg-rose-400/10 px-4 py-3 text-sm text-rose-100">
-                  {error}
-                </p>
-              ) : null}
-
-              {feedback ? (
-                <p className="rounded-2xl border border-cyan-300/20 bg-cyan-300/10 px-4 py-3 text-sm text-cyan-100">
-                  {feedback}
-                </p>
-              ) : null}
-
-              <div className="flex flex-col gap-3 sm:flex-row">
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="inline-flex flex-1 items-center justify-center rounded-full bg-ink px-5 py-3 text-sm font-medium text-canvas transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  {loading ? "Sending..." : "Send magic link"}
-                </button>
-                <button
-                  type="button"
-                  onClick={closeModal}
-                  disabled={loading}
-                  className="inline-flex items-center justify-center rounded-full border border-white/10 px-5 py-3 text-sm text-muted transition hover:border-white/20 hover:text-ink disabled:opacity-60"
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
+              {loading ? "Sending..." : "Send magic link"}
+            </button>
+            <button
+              type="button"
+              onClick={closeModal}
+              disabled={loading}
+              className="inline-flex items-center justify-center rounded-full border border-white/10 px-5 py-3 text-sm text-muted transition hover:border-white/20 hover:text-ink disabled:opacity-60"
+            >
+              Cancel
+            </button>
           </div>
-        </div>
-      ) : null}
+        </form>
+      </Modal>
     </div>
   );
 }
