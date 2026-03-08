@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { Check, Copy } from "lucide-react";
 import { buildExport, type ExportFormat } from "@/lib/exports";
+import { showToast } from "@/lib/toast";
 import type { Palette } from "@/types/palette";
 import { cn } from "@/lib/utils";
 
@@ -25,6 +26,7 @@ export function ExportPanel({ palette }: ExportPanelProps) {
   async function handleCopy() {
     await navigator.clipboard.writeText(output);
     setCopied(true);
+    showToast("Copied!");
     window.setTimeout(() => setCopied(false), 1800);
   }
 

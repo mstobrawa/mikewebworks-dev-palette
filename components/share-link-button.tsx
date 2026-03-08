@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Share2 } from "lucide-react";
+import { showToast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
 
 type ShareLinkButtonProps = {
@@ -23,6 +24,7 @@ export function ShareLinkButton({
     const shareUrl = `${window.location.origin}${path}`;
     await navigator.clipboard.writeText(shareUrl);
     setCopied(true);
+    showToast("Copied!");
     window.setTimeout(() => setCopied(false), 1200);
   }
 

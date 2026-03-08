@@ -6,12 +6,14 @@ import {
   useState,
 } from "react";
 import { CheckCircle2, History, Link2, Save } from "lucide-react";
+import { ContrastChecker } from "@/components/contrast-checker";
 import { ExportPanel } from "@/components/export-panel";
 import { GenerateButton } from "@/components/generate-button";
 import { HarmonySelector } from "@/components/harmony-selector";
 import { Modal } from "@/components/modal";
 import { PaletteStrip } from "@/components/palette-strip";
 import { UIPreview } from "@/components/ui-preview";
+import { showToast } from "@/lib/toast";
 import { generatePalette, paletteToSearchParam } from "@/lib/palette";
 import type { HarmonyMode, Palette } from "@/types/palette";
 
@@ -23,6 +25,7 @@ type PaletteStudioProps = {
 export function PaletteStudio({ initialPalette, canSave }: PaletteStudioProps) {
   const [mode, setMode] = useState<HarmonyMode>("random");
   const [palette, setPalette] = useState(initialPalette);
+  const [paletteId, setPaletteId] = useState<string | null>(null);
   const [history, setHistory] = useState<Palette[]>([initialPalette]);
   const [isSaving, setIsSaving] = useState(false);
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
@@ -34,6 +37,7 @@ export function PaletteStudio({ initialPalette, canSave }: PaletteStudioProps) {
   const handleGenerate = () => {
     const nextPalette = generatePalette(mode);
     setPalette(nextPalette);
+    setPaletteId(null);
     setHistory((current) => [nextPalette, ...current].slice(0, 8));
     const url = new URL(window.location.href);
     url.searchParams.set("palette", paletteToSearchParam(nextPalette));
@@ -58,7 +62,7 @@ export function PaletteStudio({ initialPalette, canSave }: PaletteStudioProps) {
   }, [handleGenerate]);
 
   function handleShare() {
-    navigator.clipboard.writeText(window.location.href);
+    void sharePalette();
   }
 
   function openSaveModal() {
@@ -73,9 +77,26 @@ export function PaletteStudio({ initialPalette, canSave }: PaletteStudioProps) {
   }
 
   async function handleSave() {
-    if (!saveName.trim()) {
-      setSaveError("Give this palette a name before saving it.");
+    const nextId = await persistPalette(saveName.trim());
+
+    if (!nextId) {
       return;
+    }
+
+    setPaletteId(nextId);
+    setIsSaveModalOpen(false);
+    setNotice({
+      title: "Palette saved",
+      description: `"${saveName.trim()}" has been stored in Supabase and is ready in your dashboard.`,
+    });
+  }
+
+  async function persistPalette(name: string) {
+    const trimmedName = name.trim();
+
+    if (!trimmedName) {
+      setSaveError("Give this palette a name before saving it.");
+      return null;
     }
 
     setIsSaving(true);
@@ -86,26 +107,48 @@ export function PaletteStudio({ initialPalette, canSave }: PaletteStudioProps) {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ name: saveName.trim(), colors: palette }),
+      body: JSON.stringify({ name: trimmedName, colors: palette }),
     });
 
     setIsSaving(false);
 
     if (response.status === 401) {
       setSaveError("Sign in to save palettes.");
-      return;
+      return null;
     }
 
     if (!response.ok) {
       setSaveError("Saving failed. Check your Supabase configuration.");
+      return null;
+    }
+
+    const data = (await response.json()) as { id: string };
+    return data.id;
+  }
+
+  async function sharePalette() {
+    if (!canSave) {
+      setNotice({
+        title: "Sign in to share",
+        description: "Sharing creates a saved public palette, so you need to sign in first.",
+      });
       return;
     }
 
-    setIsSaveModalOpen(false);
-    setNotice({
-      title: "Palette saved",
-      description: `"${saveName.trim()}" has been stored in Supabase and is ready in your dashboard.`,
-    });
+    let nextId = paletteId;
+
+    if (!nextId) {
+      const sharedName = `Palette ${new Date().toLocaleDateString()}`;
+      nextId = await persistPalette(sharedName);
+      if (!nextId) {
+        return;
+      }
+      setPaletteId(nextId);
+    }
+
+    const shareUrl = `${window.location.origin}/p/${nextId}`;
+    await navigator.clipboard.writeText(shareUrl);
+    showToast("Copied!");
   }
 
   return (
@@ -154,6 +197,8 @@ export function PaletteStudio({ initialPalette, canSave }: PaletteStudioProps) {
         <PaletteStrip palette={deferredPalette} />
       </section>
 
+      <ContrastChecker palette={deferredPalette} />
+
       <div className="grid gap-8 xl:items-start xl:grid-cols-[1.2fr_0.8fr]">
         <UIPreview palette={deferredPalette} />
         <div className="space-y-8">
@@ -168,7 +213,10 @@ export function PaletteStudio({ initialPalette, canSave }: PaletteStudioProps) {
                 <button
                   key={`${item.primary}-${index}`}
                   type="button"
-                  onClick={() => setPalette(item)}
+                  onClick={() => {
+                    setPalette(item);
+                    setPaletteId(null);
+                  }}
                   className="grid grid-cols-5 overflow-hidden rounded-2xl border border-white/10"
                 >
                   {Object.values(item).map((value) => (

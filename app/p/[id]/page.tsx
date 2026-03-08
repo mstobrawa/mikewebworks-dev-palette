@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, ExternalLink } from "lucide-react";
+import { ArrowLeft, ExternalLink, Sparkles } from "lucide-react";
+import { ContrastChecker } from "@/components/contrast-checker";
 import { PaletteStrip } from "@/components/palette-strip";
 import { ShareLinkButton } from "@/components/share-link-button";
 import { createClient } from "@/lib/supabase/server";
@@ -13,8 +14,8 @@ type PublicPalettePageProps = {
 };
 
 export async function generateMetadata(): Promise<Metadata> {
-  const title = "Color palette - Dev Palette Generator";
-  const description = "UI color palette generated with Dev Palette Generator";
+  const title = "Color palette – Dev Palette Generator";
+  const description = "Generate UI color palettes and export them directly to CSS, SCSS, and Tailwind.";
 
   return {
     title,
@@ -92,12 +93,17 @@ export default async function PublicPalettePage({ params }: PublicPalettePagePro
         <PaletteStrip palette={colors} />
       </section>
 
+      <div className="mt-6">
+        <ContrastChecker palette={colors} />
+      </div>
+
       <div className="mt-8 flex justify-center">
         <Link
           href="/"
-          className="inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-300/10 px-4 py-2 text-sm text-cyan-100 transition hover:border-cyan-200/40 hover:bg-cyan-300/15"
+          className="inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-300/10 px-4 py-2 text-sm text-cyan-100 transition hover:-translate-y-0.5 hover:border-cyan-200/40 hover:bg-cyan-300/15"
         >
-          <span aria-hidden="true">Crafted by Mike Webworks</span>
+          <Sparkles className="h-4 w-4" />
+          <span>Crafted by Mike Webworks</span>
         </Link>
       </div>
     </div>

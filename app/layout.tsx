@@ -3,6 +3,7 @@ import { JetBrains_Mono, Space_Grotesk } from "next/font/google";
 import "@/app/globals.css";
 import { Footer } from "@/components/footer";
 import { SiteNavbar } from "@/components/site-navbar";
+import { ToastHost } from "@/components/toast-host";
 import { cn } from "@/lib/utils";
 
 const sans = Space_Grotesk({
@@ -17,7 +18,10 @@ const mono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: "Mike Webworks - Dev Palette Generator",
-  description: "Generate developer-ready color palettes and export them to CSS, SCSS, Tailwind, and design tokens."
+  description: "Generate developer-ready color palettes and export them to CSS, SCSS, Tailwind, and design tokens.",
+  icons: {
+    icon: "/logo-svg.svg",
+  },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
@@ -29,6 +33,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           <main className="flex-1">{children}</main>
           <Footer />
         </div>
+        <ToastHost />
       </body>
     </html>
   );

@@ -45,10 +45,9 @@ export async function DELETE(_request: Request, { params }: RouteContext) {
 
   const { data: existingPalette, error: existingPaletteError } = await supabase
     .from("palettes")
-    .select("id")
+    .select("id, user_id")
     .eq("id", id)
-    .eq("user_id", user.id)
-    .maybeSingle();
+    .maybeSingle<{ id: string; user_id: string | null }>();
 
   if (existingPaletteError) {
     return NextResponse.json({ error: existingPaletteError.message }, { status: 500 });
@@ -56,6 +55,10 @@ export async function DELETE(_request: Request, { params }: RouteContext) {
 
   if (!existingPalette) {
     return NextResponse.json({ error: "Palette not found." }, { status: 404 });
+  }
+
+  if (existingPalette.user_id !== user.id) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   const { error } = await supabase.from("palettes").delete().eq("id", id).eq("user_id", user.id);

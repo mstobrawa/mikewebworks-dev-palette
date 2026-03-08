@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Copy } from "lucide-react";
+import { showToast } from "@/lib/toast";
 import { cn, hexToRgbString } from "@/lib/utils";
 import type { Palette, PaletteRole } from "@/types/palette";
 
@@ -18,6 +19,7 @@ export function PaletteStrip({ palette, compact = false, className }: PaletteStr
   async function handleCopy(role: PaletteRole, value: string) {
     await navigator.clipboard.writeText(value);
     setCopiedKey(role);
+    showToast("Copied!");
     window.setTimeout(() => setCopiedKey((current) => (current === role ? null : current)), 1200);
   }
 
