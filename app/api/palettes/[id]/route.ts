@@ -43,6 +43,21 @@ export async function DELETE(_request: Request, { params }: RouteContext) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  const { data: existingPalette, error: existingPaletteError } = await supabase
+    .from("palettes")
+    .select("id")
+    .eq("id", id)
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  if (existingPaletteError) {
+    return NextResponse.json({ error: existingPaletteError.message }, { status: 500 });
+  }
+
+  if (!existingPalette) {
+    return NextResponse.json({ error: "Palette not found." }, { status: 404 });
+  }
+
   const { error } = await supabase.from("palettes").delete().eq("id", id).eq("user_id", user.id);
 
   if (error) {

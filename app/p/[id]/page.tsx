@@ -1,7 +1,9 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, ExternalLink } from "lucide-react";
-import { PaletteCard } from "@/components/palette-card";
+import { PaletteStrip } from "@/components/palette-strip";
+import { ShareLinkButton } from "@/components/share-link-button";
 import { createClient } from "@/lib/supabase/server";
 import { formatDate } from "@/lib/utils";
 import type { Palette, PublicPaletteRecord } from "@/types/palette";
@@ -9,6 +11,26 @@ import type { Palette, PublicPaletteRecord } from "@/types/palette";
 type PublicPalettePageProps = {
   params: Promise<{ id: string }>;
 };
+
+export async function generateMetadata(): Promise<Metadata> {
+  const title = "Color palette - Dev Palette Generator";
+  const description = "UI color palette generated with Dev Palette Generator";
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+    },
+  };
+}
 
 export default async function PublicPalettePage({ params }: PublicPalettePageProps) {
   const { id } = await params;
@@ -47,6 +69,7 @@ export default async function PublicPalettePage({ params }: PublicPalettePagePro
             </p>
           </div>
           <div className="flex flex-col gap-3 sm:flex-row sm:justify-center lg:justify-end">
+            <ShareLinkButton path={`/p/${palette.id}`} defaultLabel="Share palette" />
             <Link
               href="/dashboard"
               className="inline-flex items-center justify-center gap-2 rounded-full border border-white/10 px-5 py-3 text-sm text-muted transition hover:border-white/20 hover:text-ink"
@@ -65,10 +88,8 @@ export default async function PublicPalettePage({ params }: PublicPalettePagePro
         </div>
       </div>
 
-      <section className="mt-6 grid gap-4 px-1 sm:px-0 lg:grid-cols-5">
-        {Object.entries(colors).map(([role, value]) => (
-          <PaletteCard key={role} label={role as keyof Palette} value={value} />
-        ))}
+      <section className="mt-6 px-1 sm:px-0">
+        <PaletteStrip palette={colors} />
       </section>
 
       <div className="mt-8 flex justify-center">
@@ -76,8 +97,7 @@ export default async function PublicPalettePage({ params }: PublicPalettePagePro
           href="/"
           className="inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-300/10 px-4 py-2 text-sm text-cyan-100 transition hover:border-cyan-200/40 hover:bg-cyan-300/15"
         >
-          <span aria-hidden="true">✨</span>
-          <span>Crafted by Mike Webworks</span>
+          <span aria-hidden="true">Crafted by Mike Webworks</span>
         </Link>
       </div>
     </div>

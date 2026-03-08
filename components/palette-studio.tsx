@@ -3,7 +3,6 @@
 import {
   useDeferredValue,
   useEffect,
-  useMemo,
   useState,
 } from "react";
 import { CheckCircle2, History, Link2, Save } from "lucide-react";
@@ -11,7 +10,7 @@ import { ExportPanel } from "@/components/export-panel";
 import { GenerateButton } from "@/components/generate-button";
 import { HarmonySelector } from "@/components/harmony-selector";
 import { Modal } from "@/components/modal";
-import { PaletteCard } from "@/components/palette-card";
+import { PaletteStrip } from "@/components/palette-strip";
 import { UIPreview } from "@/components/ui-preview";
 import { generatePalette, paletteToSearchParam } from "@/lib/palette";
 import type { HarmonyMode, Palette } from "@/types/palette";
@@ -31,10 +30,6 @@ export function PaletteStudio({ initialPalette, canSave }: PaletteStudioProps) {
   const [saveError, setSaveError] = useState<string | null>(null);
   const [notice, setNotice] = useState<{ title: string; description: string } | null>(null);
   const deferredPalette = useDeferredValue(palette);
-  const paletteEntries = useMemo(
-    () => Object.entries(deferredPalette),
-    [deferredPalette],
-  );
 
   const handleGenerate = () => {
     const nextPalette = generatePalette(mode);
@@ -155,10 +150,8 @@ export function PaletteStudio({ initialPalette, canSave }: PaletteStudioProps) {
         </div>
       </section>
 
-      <section className="grid gap-4 px-1 sm:px-0 lg:grid-cols-5">
-        {paletteEntries.map(([role, value]) => (
-          <PaletteCard key={role} label={role as keyof Palette} value={value} />
-        ))}
+      <section className="px-1 sm:px-0">
+        <PaletteStrip palette={deferredPalette} />
       </section>
 
       <div className="grid gap-8 xl:items-start xl:grid-cols-[1.2fr_0.8fr]">
