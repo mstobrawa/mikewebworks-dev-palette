@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { CheckCircle2, Trash2 } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Modal } from "@/components/modal";
 import { PaletteStrip } from "@/components/palette-strip";
@@ -80,9 +81,9 @@ export function SavedPaletteList({ initialPalettes }: SavedPaletteListProps) {
               </button>
             </div>
           </div>
-          <div className="mt-5">
+          <Link href={`/p/${palette.id}`} className="mt-5 block">
             <PaletteStrip palette={palette.colors} compact />
-          </div>
+          </Link>
         </article>
       ))}
 

@@ -77,7 +77,7 @@ export function PaletteStudio({ initialPalette, canSave }: PaletteStudioProps) {
   }
 
   async function handleSave() {
-    const nextId = await persistPalette(saveName.trim());
+    const nextId = await persistPalette(saveName.trim(), false);
 
     if (!nextId) {
       return;
@@ -91,7 +91,7 @@ export function PaletteStudio({ initialPalette, canSave }: PaletteStudioProps) {
     });
   }
 
-  async function persistPalette(name: string) {
+  async function persistPalette(name: string, isPublic: boolean) {
     const trimmedName = name.trim();
 
     if (!trimmedName) {
@@ -107,7 +107,7 @@ export function PaletteStudio({ initialPalette, canSave }: PaletteStudioProps) {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ name: trimmedName, colors: palette }),
+      body: JSON.stringify({ name: trimmedName, colors: palette, public: isPublic }),
     });
 
     setIsSaving(false);
@@ -127,19 +127,11 @@ export function PaletteStudio({ initialPalette, canSave }: PaletteStudioProps) {
   }
 
   async function sharePalette() {
-    if (!canSave) {
-      setNotice({
-        title: "Sign in to share",
-        description: "Sharing creates a saved public palette, so you need to sign in first.",
-      });
-      return;
-    }
-
     let nextId = paletteId;
 
     if (!nextId) {
       const sharedName = `Palette ${new Date().toLocaleDateString()}`;
-      nextId = await persistPalette(sharedName);
+      nextId = await persistPalette(sharedName, true);
       if (!nextId) {
         return;
       }

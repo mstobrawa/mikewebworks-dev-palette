@@ -47,11 +47,15 @@ export function ToastHost() {
   }
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-4 z-[80] flex justify-center px-4">
-      <div className="inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-[#0b1222]/95 px-4 py-2 text-sm text-cyan-100 shadow-panel backdrop-blur-md">
+    <div className="fixed inset-x-0 bottom-4 z-[80] flex justify-center px-4">
+      <button
+        type="button"
+        onClick={() => setToast(null)}
+        className="inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-[#0b1222]/95 px-4 py-2 text-sm text-cyan-100 shadow-panel backdrop-blur-md"
+      >
         <CheckCircle2 className="h-4 w-4" />
         {toast.message}
-      </div>
+      </button>
     </div>
   );
 }

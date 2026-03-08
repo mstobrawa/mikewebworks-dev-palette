@@ -5,6 +5,7 @@ import type { Palette } from "@/types/palette";
 type SavePayload = {
   name: string;
   colors: Palette;
+  public?: boolean;
 };
 
 export async function POST(request: Request) {
@@ -14,20 +15,19 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Supabase is not configured." }, { status: 503 });
   }
 
+  const payload = (await request.json()) as SavePayload;
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) {
+  if (!payload.public && !user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-
-  const payload = (await request.json()) as SavePayload;
 
   const { data, error } = await supabase
     .from("palettes" as any)
     .insert({
-      user_id: user.id,
+      user_id: payload.public ? null : user?.id ?? null,
       name: payload.name,
       colors: payload.colors,
     } as any)

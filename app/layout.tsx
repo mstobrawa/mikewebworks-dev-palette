@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   title: "Mike Webworks - Dev Palette Generator",
   description: "Generate developer-ready color palettes and export them to CSS, SCSS, Tailwind, and design tokens.",
   icons: {
-    icon: "/logo-svg.svg",
+    icon: "/final-logo-small-svg.svg",
   },
 };
 
