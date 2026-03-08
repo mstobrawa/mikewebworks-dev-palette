@@ -1,9 +1,31 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import type { PublicPaletteRecord } from "@/types/palette";
 
 type RouteContext = {
   params: Promise<{ id: string }>;
 };
+
+export async function GET(_request: Request, { params }: RouteContext) {
+  const { id } = await params;
+  const supabase = await createClient();
+
+  if (!supabase) {
+    return NextResponse.json({ error: "Supabase is not configured." }, { status: 503 });
+  }
+
+  const { data, error } = await supabase
+    .from("palettes")
+    .select("id, name, colors, created_at")
+    .eq("id", id)
+    .single();
+
+  if (error || !data) {
+    return NextResponse.json({ error: "Palette not found." }, { status: 404 });
+  }
+
+  return NextResponse.json(data as PublicPaletteRecord);
+}
 
 export async function DELETE(_request: Request, { params }: RouteContext) {
   const { id } = await params;

@@ -16,3 +16,5 @@ export type PaletteRecord = {
   created_at: string;
   user_id: string;
 };
+
+export type PublicPaletteRecord = Omit<PaletteRecord, "user_id">;
