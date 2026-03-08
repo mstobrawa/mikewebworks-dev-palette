@@ -3,7 +3,7 @@ import { createServerClient } from "@supabase/ssr";
 
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({
-    request
+    request,
   });
 
   const supabase = createServerClient(
@@ -14,15 +14,16 @@ export async function middleware(request: NextRequest) {
         getAll() {
           return request.cookies.getAll();
         },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+        setAll(cookiesToSet: any[]) {
+          cookiesToSet.forEach(({ name, value }: any) =>
+            request.cookies.set(name, value),
+          );
           response = NextResponse.next({
-            request
+            request,
           });
-          cookiesToSet.forEach(({ name, value, options }) => response.cookies.set(name, value, options));
-        }
-      }
-    }
+        },
+      },
+    },
   );
 
   await supabase.auth.getUser();
@@ -30,5 +31,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"]
+  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
 };
