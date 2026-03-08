@@ -27,7 +27,7 @@ export async function POST(request: Request) {
         name: payload.name,
         colors: payload.colors,
       },
-    ])
+    ] as any)
     .select()
     .single();
 
