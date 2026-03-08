@@ -19,15 +19,13 @@ export async function POST(request: Request) {
 
   const payload = (await request.json()) as SavePayload;
 
-  const { data, error } = await (supabase as any)
-    .from("palettes")
-    .insert([
-      {
-        user_id: user.id,
-        name: payload.name,
-        colors: payload.colors,
-      },
-    ])
+  const { data, error } = await supabase
+    .from("palettes" as any)
+    .insert({
+      user_id: user.id,
+      name: payload.name,
+      colors: payload.colors,
+    } as any)
     .select()
     .single();
 
