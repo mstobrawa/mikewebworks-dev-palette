@@ -19,7 +19,7 @@ export async function POST(request: Request) {
 
   const payload = (await request.json()) as SavePayload;
 
-  const { data, error } = await supabase
+  const { data, error } = await (supabase as any)
     .from("palettes")
     .insert([
       {
@@ -27,7 +27,7 @@ export async function POST(request: Request) {
         name: payload.name,
         colors: payload.colors,
       },
-    ] as any)
+    ])
     .select()
     .single();
 
