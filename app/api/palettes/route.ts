@@ -10,7 +10,7 @@ type SavePayload = {
 export async function POST(request: Request) {
   const supabase = await createClient();
   const {
-    data: { user }
+    data: { user },
   } = await supabase.auth.getUser();
 
   if (!user) {
@@ -21,11 +21,13 @@ export async function POST(request: Request) {
 
   const { data, error } = await supabase
     .from("palettes")
-    .insert({
-      user_id: user.id,
-      name: payload.name,
-      colors: payload.colors
-    })
+    .insert([
+      {
+        user_id: user.id,
+        name: payload.name,
+        colors: payload.colors,
+      },
+    ])
     .select()
     .single();
 
