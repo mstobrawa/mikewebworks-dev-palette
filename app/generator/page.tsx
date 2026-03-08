@@ -9,9 +9,11 @@ type GeneratorPageProps = {
 export default async function GeneratorPage({ searchParams }: GeneratorPageProps) {
   const params = await searchParams;
   const supabase = await createClient();
-  const {
-    data: { user }
-  } = await supabase.auth.getUser();
+  const user = supabase
+    ? (
+        await supabase.auth.getUser()
+      ).data.user
+    : null;
 
   const initialPalette = searchParamToPalette(params.palette) ?? generatePalette("random");
 

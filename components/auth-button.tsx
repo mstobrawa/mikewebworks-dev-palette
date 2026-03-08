@@ -3,13 +3,19 @@
 import { useEffect, useState } from "react";
 import { LogIn, LogOut } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { isSupabaseConfigured } from "@/lib/supabase/config";
 
 export function AuthButton() {
   const supabase = createClient();
   const [loading, setLoading] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const isConfigured = isSupabaseConfigured();
 
   useEffect(() => {
+    if (!supabase) {
+      return;
+    }
+
     let active = true;
 
     supabase.auth.getSession().then(({ data }) => {
@@ -30,9 +36,11 @@ export function AuthButton() {
       active = false;
       subscription.unsubscribe();
     };
-  }, [supabase.auth]);
+  }, [supabase]);
 
   async function signIn() {
+    if (!supabase) return;
+
     const email = window.prompt("Email address");
     if (!email) return;
 
@@ -48,10 +56,20 @@ export function AuthButton() {
   }
 
   async function signOut() {
+    if (!supabase) return;
+
     setLoading(true);
     await supabase.auth.signOut();
     setLoading(false);
     window.location.reload();
+  }
+
+  if (!isConfigured) {
+    return (
+      <span className="rounded-full border border-white/10 px-4 py-2 text-sm text-muted">
+        Auth unavailable
+      </span>
+    );
   }
 
   return (

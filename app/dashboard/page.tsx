@@ -5,11 +5,13 @@ import type { PaletteRecord } from "@/types/palette";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
-  const {
-    data: { user }
-  } = await supabase.auth.getUser();
+  const user = supabase
+    ? (
+        await supabase.auth.getUser()
+      ).data.user
+    : null;
 
-  if (!user) {
+  if (!supabase || !user) {
     return (
       <div className="mx-auto max-w-4xl px-6 py-20 lg:px-8">
         <div className="rounded-[2rem] border border-white/10 bg-white/5 p-10 text-center shadow-panel">
