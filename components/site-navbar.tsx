@@ -12,10 +12,10 @@ const links: { href: Route; label: string }[] = [
 export function SiteNavbar() {
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-canvas/80 backdrop-blur-xl">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 lg:px-8">
+      <div className="mx-auto flex max-w-7xl flex-col items-center gap-4 px-4 py-4 sm:px-6 md:flex-row md:justify-between lg:px-8">
         <Link
           href="/"
-          className="flex items-center gap-3 text-sm font-medium text-ink"
+          className="flex items-center gap-3 text-center text-sm font-medium text-ink md:text-left"
         >
           <Image
             src="/final-logo-small-svg.svg"
@@ -31,7 +31,7 @@ export function SiteNavbar() {
             </span>
           </span>
         </Link>
-        <nav className="hidden items-center gap-6 md:flex">
+        <nav className="flex flex-wrap items-center justify-center gap-4 md:gap-6">
           {links.map((link) => (
             <Link
               key={link.href}

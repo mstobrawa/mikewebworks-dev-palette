@@ -94,26 +94,26 @@ export function PaletteStudio({ initialPalette, canSave }: PaletteStudioProps) {
 
   return (
     <div className="grid gap-8">
-      <section className="rounded-[2rem] border border-white/10 bg-white/5 p-6 shadow-panel">
+      <section className="rounded-[2rem] border border-white/10 bg-white/5 p-5 shadow-panel sm:p-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-          <div className="space-y-3">
+          <div className="space-y-3 text-center lg:text-left">
             <p className="text-sm uppercase tracking-[0.3em] text-cyan-200/80">
               Generator
             </p>
-            <h1 className="text-4xl font-semibold tracking-tight text-ink">
+            <h1 className="text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
               Build polished palettes for production UIs.
             </h1>
-            <p className="max-w-2xl text-sm leading-7 text-muted">
+            <p className="mx-auto max-w-2xl text-sm leading-7 text-muted lg:mx-0">
               Generate color systems with harmony rules, preview them in
               context, and ship exports straight into your stack.
             </p>
           </div>
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-center lg:justify-end">
             <GenerateButton onClick={handleGenerate} />
             <button
               type="button"
               onClick={handleShare}
-              className="inline-flex items-center gap-2 rounded-full border border-white/10 px-4 py-3 text-sm text-muted transition hover:border-white/20 hover:text-ink"
+              className="inline-flex items-center justify-center gap-2 rounded-full border border-white/10 px-4 py-3 text-sm text-muted transition hover:border-white/20 hover:text-ink"
             >
               <Link2 className="h-4 w-4" />
               Share URL
@@ -122,7 +122,7 @@ export function PaletteStudio({ initialPalette, canSave }: PaletteStudioProps) {
               type="button"
               onClick={handleSave}
               disabled={!canSave || isPending}
-              className="inline-flex items-center gap-2 rounded-full border border-white/10 px-4 py-3 text-sm text-muted transition hover:border-white/20 hover:text-ink disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex items-center justify-center gap-2 rounded-full border border-white/10 px-4 py-3 text-sm text-muted transition hover:border-white/20 hover:text-ink disabled:cursor-not-allowed disabled:opacity-50"
             >
               <Save className="h-4 w-4" />
               Save Palette (Pro)
