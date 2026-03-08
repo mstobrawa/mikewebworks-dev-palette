@@ -8,10 +8,14 @@ type RouteContext = {
 
 export async function GET(_request: Request, { params }: RouteContext) {
   const { id } = await params;
+
   const supabase = await createClient();
 
   if (!supabase) {
-    return NextResponse.json({ error: "Supabase is not configured." }, { status: 503 });
+    return NextResponse.json(
+      { error: "Supabase client not available" },
+      { status: 500 },
+    );
   }
 
   const { data, error } = await supabase
@@ -29,42 +33,40 @@ export async function GET(_request: Request, { params }: RouteContext) {
 
 export async function DELETE(_request: Request, { params }: RouteContext) {
   const { id } = await params;
+
   const supabase = await createClient();
 
   if (!supabase) {
-    return NextResponse.json({ error: "Supabase is not configured." }, { status: 503 });
+    return NextResponse.json(
+      { error: "Supabase client not available" },
+      { status: 500 },
+    );
   }
 
   const {
-    data: { user }
+    data: { user },
   } = await supabase.auth.getUser();
 
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { data: existingPalette, error: existingPaletteError } = await supabase
+  const { data, error } = await supabase
     .from("palettes")
-    .select("id, user_id")
+    .delete()
     .eq("id", id)
-    .maybeSingle<{ id: string; user_id: string | null }>();
-
-  if (existingPaletteError) {
-    return NextResponse.json({ error: existingPaletteError.message }, { status: 500 });
-  }
-
-  if (!existingPalette) {
-    return NextResponse.json({ error: "Palette not found." }, { status: 404 });
-  }
-
-  if (existingPalette.user_id !== user.id) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
-
-  const { error } = await supabase.from("palettes").delete().eq("id", id).eq("user_id", user.id);
+    .eq("user_id", user.id)
+    .select();
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  if (!data || data.length === 0) {
+    return NextResponse.json(
+      { error: "Palette not deleted (check RLS)." },
+      { status: 403 },
+    );
   }
 
   return NextResponse.json({ success: true });
