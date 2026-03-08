@@ -18,7 +18,7 @@ export default async function GeneratorPage({ searchParams }: GeneratorPageProps
   const initialPalette = searchParamToPalette(params.palette) ?? generatePalette("random");
 
   return (
-    <div className="mx-auto max-w-7xl px-6 py-14 lg:px-8 lg:py-20">
+    <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-14 lg:px-8 lg:py-20">
       <PaletteStudio initialPalette={initialPalette} canSave={Boolean(user)} />
     </div>
   );

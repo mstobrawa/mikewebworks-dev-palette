@@ -93,7 +93,7 @@ export function PaletteStudio({ initialPalette, canSave }: PaletteStudioProps) {
   }
 
   return (
-    <div className="grid gap-8">
+    <div className="grid gap-6 sm:gap-8">
       <section className="rounded-[2rem] border border-white/10 bg-white/5 p-5 shadow-panel sm:p-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div className="space-y-3 text-center lg:text-left">
@@ -134,13 +134,13 @@ export function PaletteStudio({ initialPalette, canSave }: PaletteStudioProps) {
         </div>
       </section>
 
-      <section className="grid gap-4 lg:grid-cols-5">
+      <section className="grid gap-4 px-1 sm:px-0 lg:grid-cols-5">
         {paletteEntries.map(([role, value]) => (
           <PaletteCard key={role} label={role as keyof Palette} value={value} />
         ))}
       </section>
 
-      <div className="grid gap-8 xl:grid-cols-[1.2fr_0.8fr]">
+      <div className="grid gap-8 xl:items-start xl:grid-cols-[1.2fr_0.8fr]">
         <UIPreview palette={deferredPalette} />
         <div className="space-y-8">
           <ExportPanel palette={deferredPalette} />
