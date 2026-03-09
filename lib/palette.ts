@@ -1,4 +1,4 @@
-import type { HarmonyMode, Palette } from "@/types/palette";
+import type { HarmonyMode, Palette, PaletteRole } from "@/types/palette";
 
 type Hsl = {
   h: number;
@@ -10,10 +10,14 @@ function randomInt(min: number, max: number) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+function wrapHue(hue: number) {
+  return ((hue % 360) + 360) % 360;
+}
+
 function hslToHex({ h, s, l }: Hsl) {
   const saturation = s / 100;
   const lightness = l / 100;
-  const hue = h / 360;
+  const hue = wrapHue(h) / 360;
 
   const hueToRgb = (p: number, q: number, t: number) => {
     let value = t;
@@ -43,52 +47,67 @@ function hslToHex({ h, s, l }: Hsl) {
   return `#${toHex(r)}${toHex(g)}${toHex(b)}`.toUpperCase();
 }
 
-function buildPaletteFromHues(hues: number[]): Palette {
-  const mapped = hues.map((hue, index) =>
-    hslToHex({
-      h: (hue + 360) % 360,
-      s: [72, 62, 78, 24, 18][index],
-      l: [54, 58, 64, 11, 90][index]
-    })
-  );
+function getHueOffsets(mode: HarmonyMode) {
+  switch (mode) {
+    case "triadic":
+      return { primary: 0, secondary: 120, accent: 240 };
+    case "analogous":
+      return { primary: 0, secondary: 20, accent: -20 };
+    case "monochromatic":
+      return { primary: 0, secondary: 10, accent: -8 };
+    case "complementary":
+      return { primary: 0, secondary: 20, accent: 180 };
+    case "random":
+    default:
+      return { primary: 0, secondary: 20, accent: 180 };
+  }
+}
+
+function buildPalette(baseHue: number, mode: HarmonyMode): Palette {
+  const isDarkTheme = Math.random() < 0.5;
+  const offsets = getHueOffsets(mode);
+  const neutralHue = wrapHue(baseHue + randomInt(-18, 18));
 
   return {
-    primary: mapped[0],
-    secondary: mapped[1],
-    accent: mapped[2],
-    background: mapped[3],
-    text: mapped[4]
+    primary: hslToHex({
+      h: baseHue + offsets.primary,
+      s: randomInt(64, 84),
+      l: isDarkTheme ? randomInt(52, 68) : randomInt(42, 56),
+    }),
+    secondary: hslToHex({
+      h: baseHue + offsets.secondary,
+      s: randomInt(48, 70),
+      l: isDarkTheme ? randomInt(46, 62) : randomInt(50, 64),
+    }),
+    accent: hslToHex({
+      h: baseHue + offsets.accent,
+      s: randomInt(70, 92),
+      l: isDarkTheme ? randomInt(58, 72) : randomInt(36, 52),
+    }),
+    background: hslToHex({
+      h: neutralHue,
+      s: randomInt(8, 18),
+      l: isDarkTheme ? randomInt(8, 20) : randomInt(85, 96),
+    }),
+    text: hslToHex({
+      h: neutralHue,
+      s: randomInt(8, 18),
+      l: isDarkTheme ? randomInt(88, 96) : randomInt(8, 18),
+    }),
   };
 }
 
-export function generatePalette(mode: HarmonyMode): Palette {
+export function generatePalette(mode: HarmonyMode, lockedColors: Partial<Record<PaletteRole, string>> = {}): Palette {
   const baseHue = randomInt(0, 359);
+  const generated = buildPalette(baseHue, mode);
 
-  switch (mode) {
-    case "complementary":
-      return buildPaletteFromHues([baseHue, baseHue + 180, baseHue + 24, baseHue - 8, baseHue + 180]);
-    case "triadic":
-      return buildPaletteFromHues([baseHue, baseHue + 120, baseHue + 240, baseHue - 15, baseHue + 160]);
-    case "analogous":
-      return buildPaletteFromHues([baseHue, baseHue + 25, baseHue - 25, baseHue - 6, baseHue + 10]);
-    case "monochromatic":
-      return {
-        primary: hslToHex({ h: baseHue, s: 74, l: 54 }),
-        secondary: hslToHex({ h: baseHue, s: 65, l: 42 }),
-        accent: hslToHex({ h: baseHue, s: 92, l: 66 }),
-        background: hslToHex({ h: baseHue, s: 28, l: 10 }),
-        text: hslToHex({ h: baseHue, s: 22, l: 93 })
-      };
-    case "random":
-    default:
-      return {
-        primary: hslToHex({ h: baseHue, s: randomInt(64, 86), l: randomInt(46, 62) }),
-        secondary: hslToHex({ h: randomInt(0, 359), s: randomInt(40, 72), l: randomInt(48, 65) }),
-        accent: hslToHex({ h: randomInt(0, 359), s: randomInt(74, 96), l: randomInt(58, 72) }),
-        background: hslToHex({ h: baseHue, s: randomInt(12, 28), l: randomInt(8, 14) }),
-        text: hslToHex({ h: baseHue, s: randomInt(10, 24), l: randomInt(88, 96) })
-      };
-  }
+  return {
+    primary: lockedColors.primary ?? generated.primary,
+    secondary: lockedColors.secondary ?? generated.secondary,
+    accent: lockedColors.accent ?? generated.accent,
+    background: lockedColors.background ?? generated.background,
+    text: lockedColors.text ?? generated.text,
+  };
 }
 
 export function paletteToSearchParam(palette: Palette) {

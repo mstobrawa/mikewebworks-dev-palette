@@ -60,28 +60,30 @@ export function SavedPaletteList({ initialPalettes }: SavedPaletteListProps) {
   }
 
   return (
-    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+    <div className="grid grid-cols-1 gap-8 md:grid-cols-2 xl:grid-cols-2">
       {palettes.map((palette) => (
         <article
           key={palette.id}
-          className="rounded-xl border border-white/10 bg-white/5 p-4 shadow-panel transition hover:border-white/20 hover:bg-white/10"
+          className="rounded-xl border border-white/10 bg-white/5 p-6 shadow-panel transition hover:border-white/20 hover:bg-white/10"
         >
           <div className="flex flex-col gap-4">
-            <div>
-              <Link href={`/p/${palette.id}`} className="inline-block">
-                <h3 className="text-lg font-semibold text-ink transition hover:text-cyan-100">
-                  {palette.name}
-                </h3>
-              </Link>
-              <p className="text-sm text-muted">{formatDate(palette.created_at)}</p>
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <Link href={`/p/${palette.id}`} className="inline-block">
+                  <h3 className="text-lg font-semibold text-ink transition hover:text-cyan-100">
+                    {palette.name}
+                  </h3>
+                </Link>
+                <p className="text-sm text-muted">{formatDate(palette.created_at)}</p>
+              </div>
             </div>
             <div className="w-full">
               <PaletteStrip palette={palette.colors} compact className="w-full" />
             </div>
-            <div className="flex flex-col gap-3 sm:flex-row">
+            <div className="flex flex-wrap items-center gap-3">
               <ShareLinkButton
                 path={`/p/${palette.id}`}
-                className="w-full sm:w-auto"
+                className="min-h-[44px]"
               />
               <button
                 type="button"
@@ -90,7 +92,7 @@ export function SavedPaletteList({ initialPalettes }: SavedPaletteListProps) {
                   event.stopPropagation();
                   setPaletteToDelete(palette);
                 }}
-                className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-white/10 px-4 py-2 text-sm text-muted transition hover:border-rose-300/20 hover:text-rose-200 disabled:opacity-60 sm:w-auto"
+                className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full border border-white/10 px-4 py-3 text-sm text-muted transition hover:border-rose-300/20 hover:text-rose-200 disabled:opacity-60"
               >
                 <Trash2 className="h-4 w-4" />
                 Delete

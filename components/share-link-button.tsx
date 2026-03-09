@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Share2 } from "lucide-react";
 import { showToast } from "@/lib/toast";
-import { cn } from "@/lib/utils";
+import { cn, copyText } from "@/lib/utils";
 
 type ShareLinkButtonProps = {
   path: string;
@@ -22,9 +22,9 @@ export function ShareLinkButton({
 
   async function handleShare() {
     const shareUrl = `${window.location.origin}${path}`;
-    await navigator.clipboard.writeText(shareUrl);
+    await copyText(shareUrl);
     setCopied(true);
-    showToast("Copied!");
+    showToast("Link copied!");
     window.setTimeout(() => setCopied(false), 1200);
   }
 
@@ -37,7 +37,7 @@ export function ShareLinkButton({
         void handleShare();
       }}
       className={cn(
-        "inline-flex items-center justify-center gap-2 rounded-full border border-white/10 px-4 py-2 text-sm text-muted transition hover:border-white/20 hover:text-ink",
+        "inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full border border-white/10 px-4 py-3 text-sm text-muted transition hover:border-white/20 hover:text-ink",
         className,
       )}
     >

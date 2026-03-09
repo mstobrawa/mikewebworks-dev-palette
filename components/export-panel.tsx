@@ -5,7 +5,7 @@ import { Check, Copy } from "lucide-react";
 import { buildExport, type ExportFormat } from "@/lib/exports";
 import { showToast } from "@/lib/toast";
 import type { Palette } from "@/types/palette";
-import { cn } from "@/lib/utils";
+import { cn, copyText } from "@/lib/utils";
 
 const formats: { id: ExportFormat; label: string }[] = [
   { id: "css", label: "CSS Variables" },
@@ -24,7 +24,7 @@ export function ExportPanel({ palette }: ExportPanelProps) {
   const output = useMemo(() => buildExport(format, palette), [format, palette]);
 
   async function handleCopy() {
-    await navigator.clipboard.writeText(output);
+    await copyText(output);
     setCopied(true);
     showToast("Copied!");
     window.setTimeout(() => setCopied(false), 1800);

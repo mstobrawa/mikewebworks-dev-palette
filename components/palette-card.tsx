@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { hexToRgbString } from "@/lib/utils";
+import { copyText, hexToRgbString } from "@/lib/utils";
 import type { PaletteRole } from "@/types/palette";
 
 type PaletteCardProps = {
@@ -13,7 +13,7 @@ export function PaletteCard({ label, value }: PaletteCardProps) {
   const [copied, setCopied] = useState(false);
 
   async function handleCopy() {
-    await navigator.clipboard.writeText(value);
+    await copyText(value);
     setCopied(true);
     window.setTimeout(() => setCopied(false), 1200);
   }

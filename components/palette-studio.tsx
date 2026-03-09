@@ -14,8 +14,9 @@ import { Modal } from "@/components/modal";
 import { PaletteStrip } from "@/components/palette-strip";
 import { UIPreview } from "@/components/ui-preview";
 import { showToast } from "@/lib/toast";
+import { copyText } from "@/lib/utils";
 import { generatePalette, paletteToSearchParam } from "@/lib/palette";
-import type { HarmonyMode, Palette } from "@/types/palette";
+import type { HarmonyMode, Palette, PaletteRole } from "@/types/palette";
 
 type PaletteStudioProps = {
   initialPalette: Palette;
@@ -26,6 +27,13 @@ export function PaletteStudio({ initialPalette, canSave }: PaletteStudioProps) {
   const [mode, setMode] = useState<HarmonyMode>("random");
   const [palette, setPalette] = useState(initialPalette);
   const [paletteId, setPaletteId] = useState<string | null>(null);
+  const [lockedRoles, setLockedRoles] = useState<Record<PaletteRole, boolean>>({
+    primary: false,
+    secondary: false,
+    accent: false,
+    background: false,
+    text: false,
+  });
   const [history, setHistory] = useState<Palette[]>([initialPalette]);
   const [isSaving, setIsSaving] = useState(false);
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
@@ -34,8 +42,17 @@ export function PaletteStudio({ initialPalette, canSave }: PaletteStudioProps) {
   const [notice, setNotice] = useState<{ title: string; description: string } | null>(null);
   const deferredPalette = useDeferredValue(palette);
 
+  function getLockedColors(currentPalette: Palette) {
+    return (Object.entries(lockedRoles) as [PaletteRole, boolean][])
+      .filter(([, isLocked]) => isLocked)
+      .reduce<Partial<Record<PaletteRole, string>>>((accumulator, [role]) => {
+        accumulator[role] = currentPalette[role];
+        return accumulator;
+      }, {});
+  }
+
   const handleGenerate = () => {
-    const nextPalette = generatePalette(mode);
+    const nextPalette = generatePalette(mode, getLockedColors(palette));
     setPalette(nextPalette);
     setPaletteId(null);
     setHistory((current) => [nextPalette, ...current].slice(0, 8));
@@ -130,17 +147,28 @@ export function PaletteStudio({ initialPalette, canSave }: PaletteStudioProps) {
     let nextId = paletteId;
 
     if (!nextId) {
-      const sharedName = `Palette ${new Date().toLocaleDateString()}`;
+      const sharedName = `Shared palette ${new Date().toLocaleDateString()}`;
       nextId = await persistPalette(sharedName, true);
       if (!nextId) {
+        setNotice({
+          title: "Share failed",
+          description: "This palette could not be published. Check your Supabase configuration and try again.",
+        });
         return;
       }
       setPaletteId(nextId);
     }
 
     const shareUrl = `${window.location.origin}/p/${nextId}`;
-    await navigator.clipboard.writeText(shareUrl);
-    showToast("Copied!");
+    await copyText(shareUrl);
+    showToast("Link copied!");
+  }
+
+  function toggleRoleLock(role: PaletteRole) {
+    setLockedRoles((current) => ({
+      ...current,
+      [role]: !current[role],
+    }));
   }
 
   return (
@@ -159,12 +187,12 @@ export function PaletteStudio({ initialPalette, canSave }: PaletteStudioProps) {
               context, and ship exports straight into your stack.
             </p>
           </div>
-          <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-center lg:justify-end">
+          <div className="flex flex-wrap gap-3 sm:items-center sm:justify-center lg:justify-end">
             <GenerateButton onClick={handleGenerate} />
             <button
               type="button"
               onClick={handleShare}
-              className="inline-flex items-center justify-center gap-2 rounded-full border border-white/10 px-4 py-3 text-sm text-muted transition hover:border-white/20 hover:text-ink"
+              className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full border border-white/10 px-4 py-3 text-sm text-muted transition hover:border-white/20 hover:text-ink"
             >
               <Link2 className="h-4 w-4" />
               Share URL
@@ -173,7 +201,7 @@ export function PaletteStudio({ initialPalette, canSave }: PaletteStudioProps) {
               type="button"
               onClick={openSaveModal}
               disabled={!canSave || isSaving}
-              className="inline-flex items-center justify-center gap-2 rounded-full border border-white/10 px-4 py-3 text-sm text-muted transition hover:border-white/20 hover:text-ink disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full border border-white/10 px-4 py-3 text-sm text-muted transition hover:border-white/20 hover:text-ink disabled:cursor-not-allowed disabled:opacity-50"
             >
               <Save className="h-4 w-4" />
               Save Palette (Pro)
@@ -186,7 +214,14 @@ export function PaletteStudio({ initialPalette, canSave }: PaletteStudioProps) {
       </section>
 
       <section className="px-1 sm:px-0">
-        <PaletteStrip palette={deferredPalette} />
+        <PaletteStrip
+          palette={deferredPalette}
+          lockedRoles={lockedRoles}
+          onToggleLock={toggleRoleLock}
+        />
+        <p className="mt-3 text-sm text-muted">
+          Click a lock icon to keep a color fixed. Press <span className="font-mono text-cyan-100">SPACE</span> to generate a new palette.
+        </p>
       </section>
 
       <ContrastChecker palette={deferredPalette} />
