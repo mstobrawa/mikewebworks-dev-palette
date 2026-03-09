@@ -51,7 +51,7 @@ export function ToastHost() {
       <button
         type="button"
         onClick={() => setToast(null)}
-        className="inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-[#0b1222]/95 px-4 py-2 text-sm text-cyan-100 shadow-panel backdrop-blur-md"
+        className="inline-flex translate-y-0 items-center gap-2 rounded-full border border-cyan-300/20 bg-[#0b1222]/95 px-4 py-2 text-sm text-cyan-100 shadow-panel backdrop-blur-md transition duration-200 ease-out hover:border-cyan-200/40"
       >
         <CheckCircle2 className="h-4 w-4" />
         {toast.message}

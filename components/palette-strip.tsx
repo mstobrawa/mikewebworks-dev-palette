@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { type MouseEvent, useState } from "react";
 import { Copy } from "lucide-react";
 import { showToast } from "@/lib/toast";
 import { cn, hexToRgbString } from "@/lib/utils";
@@ -16,11 +16,37 @@ export function PaletteStrip({ palette, compact = false, className }: PaletteStr
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const entries = Object.entries(palette) as [PaletteRole, string][];
 
-  async function handleCopy(role: PaletteRole, value: string) {
+  async function handleCopy(event: MouseEvent<HTMLButtonElement>, role: PaletteRole, value: string) {
+    event.stopPropagation();
+    event.preventDefault();
     await navigator.clipboard.writeText(value);
     setCopiedKey(role);
     showToast("Copied!");
     window.setTimeout(() => setCopiedKey((current) => (current === role ? null : current)), 1200);
+  }
+
+  if (compact) {
+    return (
+      <div className={cn("grid gap-2 md:flex md:w-full md:gap-0 md:overflow-hidden md:rounded-xl", className)}>
+        {entries.map(([role, value], index) => (
+          <button
+            key={role}
+            type="button"
+            onClick={(event) => void handleCopy(event, role, value)}
+            className={cn(
+              "relative h-16 w-full overflow-hidden rounded-lg border border-white/10 transition hover:opacity-95 md:flex-1 md:rounded-none md:border-y md:border-l-0 md:border-r md:border-white/10 md:first:border-l md:last:border-r",
+              index === 0 && "md:rounded-l-xl",
+              index === entries.length - 1 && "md:rounded-r-xl",
+            )}
+            style={{ backgroundColor: value }}
+          >
+            <span className="absolute right-2 top-2 rounded-full bg-black/35 px-2 py-1 font-mono text-[10px] text-white/90 backdrop-blur-sm">
+              {copiedKey === role ? "Copied!" : value}
+            </span>
+          </button>
+        ))}
+      </div>
+    );
   }
 
   return (
@@ -29,7 +55,7 @@ export function PaletteStrip({ palette, compact = false, className }: PaletteStr
         <button
           key={role}
           type="button"
-          onClick={() => void handleCopy(role, value)}
+          onClick={(event) => void handleCopy(event, role, value)}
           className={cn(
             "overflow-hidden border border-white/10 bg-white/5 text-left transition hover:border-white/20 md:min-w-0 md:flex-1 md:rounded-none md:border-y-0 md:border-l-0 md:border-r md:border-white/10 md:bg-transparent md:shadow-none md:last:border-r-0",
             compact ? "rounded-2xl" : "rounded-3xl shadow-panel",
