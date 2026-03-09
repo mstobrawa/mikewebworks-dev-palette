@@ -35,15 +35,15 @@ export function PaletteStrip({
 
   if (compact) {
     return (
-      <div className={cn("grid gap-2 md:flex md:w-full md:gap-0 md:overflow-hidden md:rounded-xl", className)}>
+      <div className={cn("grid gap-2 md:flex md:h-24 md:w-full md:gap-0 md:overflow-hidden md:rounded-lg", className)}>
         {entries.map(([role, value], index) => (
           <div
             key={role}
             className={cn(
-              "relative h-16 w-full overflow-hidden rounded-lg border border-white/10 transition hover:opacity-95 md:flex-1 md:rounded-none md:border-y md:border-l-0 md:border-r md:border-white/10 md:first:border-l md:last:border-r",
+              "relative h-24 w-full overflow-hidden rounded-lg border border-white/10 transition hover:opacity-95 md:flex-1 md:rounded-none md:border-y md:border-l-0 md:border-r md:border-white/10 md:first:border-l md:last:border-r",
               lockedRoles?.[role] && "opacity-95",
-              index === 0 && "md:rounded-l-xl",
-              index === entries.length - 1 && "md:rounded-r-xl",
+              index === 0 && "md:rounded-l-lg",
+              index === entries.length - 1 && "md:rounded-r-lg",
             )}
           >
             <button

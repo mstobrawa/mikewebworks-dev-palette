@@ -147,20 +147,40 @@ export function PaletteStudio({ initialPalette, canSave }: PaletteStudioProps) {
     let nextId = paletteId;
 
     if (!nextId) {
-      const sharedName = `Shared palette ${new Date().toLocaleDateString()}`;
-      nextId = await persistPalette(sharedName, true);
-      if (!nextId) {
-        setNotice({
-          title: "Share failed",
-          description: "This palette could not be published. Check your Supabase configuration and try again.",
-        });
+      const response = await fetch("/api/palettes", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: "Shared palette",
+          colors: palette,
+          public: true,
+        }),
+      });
+
+      if (!response.ok) {
+        showToast("Share failed");
         return;
       }
+
+      const data = (await response.json()) as { id?: string };
+      nextId = data.id ?? null;
+
+      if (!nextId) {
+        showToast("Share failed");
+        return;
+      }
+
       setPaletteId(nextId);
     }
 
     const shareUrl = `${window.location.origin}/p/${nextId}`;
-    await copyText(shareUrl);
+    const copied = await copyText(shareUrl);
+    if (!copied) {
+      showToast("Share failed");
+      return;
+    }
     showToast("Link copied!");
   }
 
