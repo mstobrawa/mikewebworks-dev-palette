@@ -7,6 +7,7 @@ type Hsl = {
   l: number;
 };
 
+const LIGHTNESS_CURVE = [92, 75, 58, 42, 18] as const;
 const tailwindStops = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900] as const;
 
 function randomInt(min: number, max: number) {
@@ -104,20 +105,20 @@ function getHueOffsets(mode: HarmonyMode) {
     case "triadic":
       return { primary: 0, secondary: 120, accent: 240 };
     case "analogous":
-      return { primary: 0, secondary: 20, accent: -20 };
+      return { primary: 0, secondary: 18, accent: 42 };
     case "monochromatic":
-      return { primary: 0, secondary: 10, accent: -8 };
+      return { primary: 0, secondary: 8, accent: 36 };
     case "complementary":
-      return { primary: 0, secondary: 20, accent: 180 };
+      return { primary: 0, secondary: 180, accent: 36 };
     case "random":
     default:
-      return { primary: 0, secondary: 20, accent: 180 };
+      return { primary: 0, secondary: 24, accent: 40 };
   }
 }
 
-function createPerceptualLightness(base: number, variance: number) {
-  const eased = base + variance;
-  return clamp(Math.round(eased), 4, 96);
+function vary(value: number, min = 5, max = 10) {
+  const direction = Math.random() < 0.5 ? -1 : 1;
+  return value + direction * randomInt(min, max);
 }
 
 function getTextOnColor(background: string) {
@@ -142,37 +143,44 @@ function ensureReadableText(background: string, preferredText?: string) {
 }
 
 function buildPalette(baseHue: number, mode: HarmonyMode): Palette {
-  const isDarkTheme = Math.random() < 0.5;
   const offsets = getHueOffsets(mode);
   const neutralHue = wrapHue(baseHue + randomInt(-18, 18));
+  const accentHue =
+    mode === "triadic" || mode === "complementary"
+      ? wrapHue(baseHue + offsets.accent)
+      : wrapHue(baseHue + randomInt(30, 50));
 
   const palette = {
     primary: hslToHex({
       h: baseHue + offsets.primary,
-      s: randomInt(64, 82),
-      l: createPerceptualLightness(isDarkTheme ? 58 : 48, randomInt(-4, 4)),
+      s: clamp(vary(72), 48, 92),
+      l: LIGHTNESS_CURVE[2],
     }),
     secondary: hslToHex({
       h: baseHue + offsets.secondary,
-      s: randomInt(42, 64),
-      l: createPerceptualLightness(isDarkTheme ? 54 : 58, randomInt(-5, 5)),
+      s: clamp(vary(58), 36, 82),
+      l: LIGHTNESS_CURVE[1],
     }),
     accent: hslToHex({
-      h: baseHue + offsets.accent,
-      s: randomInt(72, 90),
-      l: createPerceptualLightness(isDarkTheme ? 64 : 44, randomInt(-4, 4)),
+      h: accentHue,
+      s: clamp(vary(80), 58, 96),
+      l: LIGHTNESS_CURVE[3],
     }),
     background: hslToHex({
       h: neutralHue,
-      s: randomInt(8, 16),
-      l: createPerceptualLightness(isDarkTheme ? 11 : 93, randomInt(-4, 3)),
+      s: clamp(vary(10), 4, 20),
+      l: LIGHTNESS_CURVE[0],
     }),
-    text: "#111111",
+    text: hslToHex({
+      h: neutralHue,
+      s: clamp(vary(10), 4, 20),
+      l: LIGHTNESS_CURVE[4],
+    }),
   };
 
   return {
     ...palette,
-    text: ensureReadableText(palette.background),
+    text: ensureReadableText(palette.background, palette.text),
   };
 }
 

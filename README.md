@@ -1,90 +1,65 @@
-# Mike Webworks - Dev Palette Generator
+# Dev Palette Generator
 
-Minimal SaaS MVP for generating professional UI color palettes, previewing them live, exporting design tokens, and saving palettes with Supabase.
+Generate UI color palettes and export them directly to Tailwind, CSS variables, or design tokens.
 
-## Stack
+Live demo:
+https://mikewebworks-dev-palette.vercel.app
 
-- Next.js App Router
-- TypeScript
-- Tailwind CSS
-- Supabase Auth + Postgres
-- Vercel-ready deployment
+## Features
 
-## Folder structure
+- Generate UI-ready color palettes
+- Lock colors and regenerate variations
+- Keyboard shortcut support (SPACE to generate)
+- WCAG contrast checking
+- UI preview of palette usage
+- Export palettes to Tailwind config
+- Export palettes to CSS variables
+- Export palettes to design tokens
+- Save palettes to your dashboard
+- Share palettes via public URLs
+- GitHub OAuth and magic link authentication
 
-```text
-.
-|-- app
-|   |-- api
-|   |   |-- palettes
-|   |   |   |-- [id]
-|   |   |   |   `-- route.ts
-|   |   |   `-- route.ts
-|   |-- dashboard
-|   |   `-- page.tsx
-|   |-- generator
-|   |   `-- page.tsx
-|   |-- globals.css
-|   |-- layout.tsx
-|   `-- page.tsx
-|-- components
-|   |-- auth-button.tsx
-|   |-- export-panel.tsx
-|   |-- footer.tsx
-|   |-- generate-button.tsx
-|   |-- harmony-selector.tsx
-|   |-- palette-card.tsx
-|   |-- palette-studio.tsx
-|   |-- saved-palette-list.tsx
-|   |-- site-navbar.tsx
-|   `-- ui-preview.tsx
-|-- lib
-|   |-- supabase
-|   |   |-- client.ts
-|   |   `-- server.ts
-|   |-- exports.ts
-|   |-- palette.ts
-|   `-- utils.ts
-|-- supabase
-|   `-- migrations
-|       `-- 20260308134000_create_palettes.sql
-|-- types
-|   |-- palette.ts
-|   `-- supabase.ts
-|-- .env.example
-|-- middleware.ts
-|-- next.config.ts
-|-- package.json
-|-- postcss.config.js
-|-- tailwind.config.ts
-`-- tsconfig.json
-```
+## Tech Stack
 
-## Run locally
+Frontend
+Next.js (App Router)
+TypeScript
 
-1. Install dependencies with `npm install`.
-2. Copy `.env.example` to `.env.local`.
-3. Create a Supabase project and fill in `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, and `NEXT_PUBLIC_APP_URL`.
-4. Run the SQL migration in `supabase/migrations/20260308134000_create_palettes.sql`.
-5. Start the app with `npm run dev`.
+Backend
+Supabase
 
-## Supabase setup
+Deployment
+Vercel
 
-1. Enable Email OTP auth in Supabase Auth.
-2. Add `http://localhost:3000/dashboard` as a redirect URL for local development.
-3. Confirm Row Level Security policies are active on `public.palettes`.
+## Local Development
 
-## MVP features included
+git clone https://github.com/mstobrawa/dev-palette-generator.git
 
-- Harmony-based palette generation
-- UI preview section
-- CSS, SCSS, Tailwind, and JSON token exports
-- Copy to clipboard
-- Shareable palette URL
-- Spacebar shortcut for regeneration
-- Supabase-backed save and delete flows
+cd dev-palette-generator
 
-## Notes
+npm install
 
-- The navbar auth button uses a lightweight email prompt to keep the starter compact. Replace it with a full auth form for production.
-- Stripe is intentionally left as a future integration point for Pro billing.
+npm run dev
+
+Open:
+http://localhost:3000
+
+## Environment Variables
+
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_key
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+
+## Release
+
+v1.0.0
+
+## Author
+
+Mike Webworks
+
+https://mikewebworks.dev
+
+## License
+
+MIT

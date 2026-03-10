@@ -1,8 +1,21 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { SavedPaletteList } from "@/components/saved-palette-list";
 import { createClient } from "@/lib/supabase/server";
 import type { PaletteRecord } from "@/types/palette";
+
+export const metadata: Metadata = {
+  title: "Dashboard",
+  description: "View saved color palettes and reopen them in the generator.",
+  alternates: {
+    canonical: "/dashboard",
+  },
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 export default async function DashboardPage() {
   const supabase = await createClient();

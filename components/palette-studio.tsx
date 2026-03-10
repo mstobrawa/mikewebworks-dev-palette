@@ -13,10 +13,9 @@ import { HarmonySelector } from "@/components/harmony-selector";
 import { Modal } from "@/components/modal";
 import { PaletteStrip } from "@/components/palette-strip";
 import { UIPreview } from "@/components/ui-preview";
-import { generateSimilarPalette } from "@/lib/palette";
+import { generatePalette, generateSimilarPalette, paletteToSearchParam } from "@/lib/palette";
 import { showToast } from "@/lib/toast";
 import { copyText } from "@/lib/utils";
-import { generatePalette, paletteToSearchParam } from "@/lib/palette";
 import type { HarmonyMode, Palette, PaletteRole } from "@/types/palette";
 
 type PaletteStudioProps = {
@@ -27,7 +26,6 @@ type PaletteStudioProps = {
 export function PaletteStudio({ initialPalette, canSave }: PaletteStudioProps) {
   const [mode, setMode] = useState<HarmonyMode>("random");
   const [palette, setPalette] = useState(initialPalette);
-  const [paletteId, setPaletteId] = useState<string | null>(null);
   const [lockedRoles, setLockedRoles] = useState<Record<PaletteRole, boolean>>({
     primary: false,
     secondary: false,
@@ -59,7 +57,6 @@ export function PaletteStudio({ initialPalette, canSave }: PaletteStudioProps) {
 
   function applyGeneratedPalette(nextPalette: Palette) {
     setPalette(nextPalette);
-    setPaletteId(null);
     setHistory((current) => [nextPalette, ...current].slice(0, 8));
     const url = new URL(window.location.href);
     url.searchParams.set("palette", paletteToSearchParam(nextPalette));
@@ -110,7 +107,6 @@ export function PaletteStudio({ initialPalette, canSave }: PaletteStudioProps) {
       return;
     }
 
-    setPaletteId(nextId);
     setIsSaveModalOpen(false);
     setNotice({
       title: "Palette saved",
@@ -272,7 +268,6 @@ export function PaletteStudio({ initialPalette, canSave }: PaletteStudioProps) {
                   type="button"
                   onClick={() => {
                     setPalette(item);
-                    setPaletteId(null);
                   }}
                   className="grid grid-cols-5 overflow-hidden rounded-2xl border border-white/10"
                 >

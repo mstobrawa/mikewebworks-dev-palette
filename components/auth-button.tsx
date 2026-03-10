@@ -5,6 +5,7 @@ import { Github, LogIn, LogOut, Mail } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { Modal } from "@/components/modal";
+import { getAppBaseUrl } from "@/lib/utils";
 
 export function AuthButton() {
   const supabase = createClient();
@@ -69,6 +70,8 @@ export function AuthButton() {
     setIsModalOpen(false);
   }
 
+  const redirectUrl = `${getAppBaseUrl()}/dashboard`;
+
   async function signIn() {
     if (!supabase) return;
     if (!email) return;
@@ -80,7 +83,7 @@ export function AuthButton() {
     const { error: signInError } = await supabase.auth.signInWithOtp({
       email,
       options: {
-        emailRedirectTo: `${window.location.origin}/dashboard`
+        emailRedirectTo: redirectUrl
       }
     });
 
@@ -114,7 +117,7 @@ export function AuthButton() {
     const { error: oauthError } = await supabase.auth.signInWithOAuth({
       provider: "github",
       options: {
-        redirectTo: `${window.location.origin}/dashboard`
+        redirectTo: redirectUrl
       }
     });
 

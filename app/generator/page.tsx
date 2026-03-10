@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { PaletteStudio } from "@/components/palette-studio";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { generatePalette, isPaletteId, searchParamToPalette } from "@/lib/palette";
@@ -6,6 +7,18 @@ import type { Palette } from "@/types/palette";
 
 type GeneratorPageProps = {
   searchParams: Promise<{ palette?: string }>;
+};
+
+export const metadata: Metadata = {
+  title: "Generator",
+  description: "Generate UI color palettes and export them to Tailwind, CSS variables or design tokens.",
+  alternates: {
+    canonical: "/generator",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default async function GeneratorPage({ searchParams }: GeneratorPageProps) {

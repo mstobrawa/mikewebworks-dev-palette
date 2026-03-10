@@ -6,10 +6,11 @@ import { showToast } from "@/lib/toast";
 import { cn, copyText } from "@/lib/utils";
 
 type ShareLinkButtonProps = {
-  path: string;
+  path?: string;
   className?: string;
   defaultLabel?: string;
   copiedLabel?: string;
+  useCurrentUrl?: boolean;
 };
 
 export function ShareLinkButton({
@@ -17,12 +18,22 @@ export function ShareLinkButton({
   className,
   defaultLabel = "Share",
   copiedLabel = "Link copied!",
+  useCurrentUrl = false,
 }: ShareLinkButtonProps) {
   const [copied, setCopied] = useState(false);
 
   async function handleShare() {
-    const shareUrl = `${window.location.origin}${path}`;
-    await copyText(shareUrl);
+    const shareUrl = useCurrentUrl
+      ? window.location.href
+      : `${window.location.origin}${path ?? ""}`;
+    const copiedSuccessfully = useCurrentUrl && navigator.clipboard?.writeText
+      ? await navigator.clipboard.writeText(window.location.href).then(() => true).catch(() => copyText(shareUrl))
+      : await copyText(shareUrl);
+
+    if (!copiedSuccessfully) {
+      return;
+    }
+
     setCopied(true);
     showToast("Link copied!");
     window.setTimeout(() => setCopied(false), 1200);

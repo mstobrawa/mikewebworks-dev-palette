@@ -1,5 +1,14 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, Code2, DatabaseZap, SwatchBook } from "lucide-react";
+
+export const metadata: Metadata = {
+  title: "Dev Palette Generator",
+  description: "Generate UI color palettes and export them to Tailwind, CSS variables or design tokens.",
+  alternates: {
+    canonical: "/",
+  },
+};
 
 const features = [
   {

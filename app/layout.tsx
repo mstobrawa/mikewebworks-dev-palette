@@ -4,7 +4,7 @@ import "@/app/globals.css";
 import { Footer } from "@/components/footer";
 import { SiteNavbar } from "@/components/site-navbar";
 import { ToastHost } from "@/components/toast-host";
-import { cn } from "@/lib/utils";
+import { cn, getAppBaseUrl } from "@/lib/utils";
 
 const sans = Space_Grotesk({
   subsets: ["latin"],
@@ -17,8 +17,39 @@ const mono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Mike Webworks - Dev Palette Generator",
-  description: "Generate developer-ready color palettes and export them to CSS, SCSS, Tailwind, and design tokens.",
+  metadataBase: new URL(getAppBaseUrl()),
+  title: {
+    default: "Dev Palette Generator",
+    template: "%s | Dev Palette Generator",
+  },
+  description: "Generate UI color palettes and export them to Tailwind, CSS variables or design tokens.",
+  alternates: {
+    canonical: "/",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+  openGraph: {
+    title: "Dev Palette Generator",
+    description: "Generate UI color palettes and export them to Tailwind, CSS variables or design tokens.",
+    url: getAppBaseUrl(),
+    siteName: "Dev Palette Generator",
+    images: [
+      {
+        url: "/opengraph-image",
+        width: 1200,
+        height: 630,
+      },
+    ],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Dev Palette Generator",
+    description: "Generate UI color palettes and export them to Tailwind or CSS variables.",
+    images: ["/opengraph-image"],
+  },
   icons: {
     icon: "/final-logo-small-svg.svg",
   },

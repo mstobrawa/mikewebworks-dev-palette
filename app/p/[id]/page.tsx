@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
 import { ArrowLeft, ExternalLink, Sparkles } from "lucide-react";
 import { ContrastChecker } from "@/components/contrast-checker";
 import { ExportPanel } from "@/components/export-panel";
@@ -8,7 +7,7 @@ import { PaletteStrip } from "@/components/palette-strip";
 import { ShareLinkButton } from "@/components/share-link-button";
 import { UIPreview } from "@/components/ui-preview";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { formatDate } from "@/lib/utils";
+import { formatDate, getAppBaseUrl } from "@/lib/utils";
 import type { Palette, PublicPaletteRecord } from "@/types/palette";
 
 type PublicPalettePageProps = {
@@ -33,15 +32,15 @@ async function loadPalette(id: string) {
 
 export async function generateMetadata({ params }: PublicPalettePageProps): Promise<Metadata> {
   const { id } = await params;
-  const palette = await loadPalette(id);
-  const title = palette ? `${palette.name} | Dev Palette Generator` : "Color palette | Dev Palette Generator";
-  const description = palette
-    ? `Explore ${palette.name}, copy HEX values, and export CSS variables or Tailwind tokens.`
-    : "Generate UI color palettes and export them directly to CSS, SCSS, and Tailwind.";
+  const title = "Shared color palette – Dev Palette Generator";
+  const description = "Explore this generated UI color palette and export it to Tailwind or CSS variables.";
 
   return {
     title,
     description,
+    alternates: {
+      canonical: `/p/${id}`,
+    },
     robots: {
       index: true,
       follow: true,
@@ -50,12 +49,20 @@ export async function generateMetadata({ params }: PublicPalettePageProps): Prom
       title,
       description,
       type: "website",
-      url: `/p/${id}`,
+      url: `${getAppBaseUrl()}/p/${id}`,
+      images: [
+        {
+          url: `/p/${id}/opengraph-image`,
+          width: 1200,
+          height: 630,
+        },
+      ],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
+      images: [`/p/${id}/opengraph-image`],
     },
   };
 }
@@ -65,7 +72,23 @@ export default async function PublicPalettePage({ params }: PublicPalettePagePro
   const data = await loadPalette(id);
 
   if (!data) {
-    notFound();
+    return (
+      <div className="mx-auto max-w-4xl px-6 py-20 lg:px-8">
+        <div className="rounded-[2rem] border border-white/10 bg-white/5 p-10 text-center shadow-panel">
+          <p className="text-sm uppercase tracking-[0.3em] text-cyan-100/80">Public palette</p>
+          <h1 className="mt-4 text-4xl font-semibold text-ink">Palette not found</h1>
+          <p className="mx-auto mt-4 max-w-2xl text-sm leading-7 text-muted">
+            This shared palette may have been removed or the link is invalid.
+          </p>
+          <Link
+            href="/generator"
+            className="mt-8 inline-flex rounded-full border border-white/10 px-5 py-3 text-sm text-muted transition hover:border-white/20 hover:text-ink"
+          >
+            Generate new palette
+          </Link>
+        </div>
+      </div>
+    );
   }
 
   const palette = data as PublicPaletteRecord;
@@ -87,7 +110,7 @@ export default async function PublicPalettePage({ params }: PublicPalettePagePro
             </p>
           </div>
           <div className="flex flex-col gap-3 sm:flex-row sm:justify-center lg:justify-end">
-            <ShareLinkButton path={`/p/${palette.id}`} defaultLabel="Share palette" />
+            <ShareLinkButton defaultLabel="Share palette" useCurrentUrl />
             <Link
               href="/dashboard"
               className="inline-flex items-center justify-center gap-2 rounded-full border border-white/10 px-5 py-3 text-sm text-muted transition hover:border-white/20 hover:text-ink"
@@ -96,7 +119,7 @@ export default async function PublicPalettePage({ params }: PublicPalettePagePro
               Back to dashboard
             </Link>
             <Link
-              href="/"
+              href={`/generator?palette=${palette.id}`}
               className="inline-flex items-center justify-center gap-2 rounded-full bg-ink px-5 py-3 text-sm font-medium text-canvas transition hover:scale-[1.01]"
             >
               <ExternalLink className="h-4 w-4" />
