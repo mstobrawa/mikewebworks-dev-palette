@@ -5,7 +5,7 @@ import { ArrowLeft, ExternalLink, Sparkles } from "lucide-react";
 import { ContrastChecker } from "@/components/contrast-checker";
 import { PaletteStrip } from "@/components/palette-strip";
 import { ShareLinkButton } from "@/components/share-link-button";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { formatDate } from "@/lib/utils";
 import type { Palette, PublicPaletteRecord } from "@/types/palette";
 
@@ -35,7 +35,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function PublicPalettePage({ params }: PublicPalettePageProps) {
   const { id } = await params;
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   if (!supabase) {
     notFound();

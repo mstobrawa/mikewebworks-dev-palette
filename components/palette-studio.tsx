@@ -94,7 +94,7 @@ export function PaletteStudio({ initialPalette, canSave }: PaletteStudioProps) {
   }
 
   async function handleSave() {
-    const nextId = await persistPalette(saveName.trim(), false);
+    const nextId = await persistPalette(saveName.trim());
 
     if (!nextId) {
       return;
@@ -108,7 +108,7 @@ export function PaletteStudio({ initialPalette, canSave }: PaletteStudioProps) {
     });
   }
 
-  async function persistPalette(name: string, isPublic: boolean) {
+  async function persistPalette(name: string) {
     const trimmedName = name.trim();
 
     if (!trimmedName) {
@@ -124,7 +124,7 @@ export function PaletteStudio({ initialPalette, canSave }: PaletteStudioProps) {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ name: trimmedName, colors: palette, public: isPublic }),
+      body: JSON.stringify({ name: trimmedName, colors: palette }),
     });
 
     setIsSaving(false);
@@ -144,41 +144,34 @@ export function PaletteStudio({ initialPalette, canSave }: PaletteStudioProps) {
   }
 
   async function sharePalette() {
-    let nextId = paletteId;
+    const response = await fetch("/api/palettes", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        name: "Shared palette",
+        colors: palette,
+      }),
+    });
+
+    if (!response.ok) {
+      showToast("Failed to create share link");
+      return;
+    }
+
+    const data = (await response.json()) as { id?: string };
+    const nextId = data.id ?? null;
 
     if (!nextId) {
-      const response = await fetch("/api/palettes", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: "Shared palette",
-          colors: palette,
-          public: true,
-        }),
-      });
-
-      if (!response.ok) {
-        showToast("Share failed");
-        return;
-      }
-
-      const data = (await response.json()) as { id?: string };
-      nextId = data.id ?? null;
-
-      if (!nextId) {
-        showToast("Share failed");
-        return;
-      }
-
-      setPaletteId(nextId);
+      showToast("Failed to create share link");
+      return;
     }
 
     const shareUrl = `${window.location.origin}/p/${nextId}`;
     const copied = await copyText(shareUrl);
     if (!copied) {
-      showToast("Share failed");
+      showToast("Failed to create share link");
       return;
     }
     showToast("Link copied!");
