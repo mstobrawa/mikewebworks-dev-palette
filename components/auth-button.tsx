@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { LogIn, LogOut, Mail } from "lucide-react";
+import { Github, LogIn, LogOut, Mail } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { Modal } from "@/components/modal";
@@ -104,6 +104,26 @@ export function AuthButton() {
     window.location.reload();
   }
 
+  async function signInWithGitHub() {
+    if (!supabase) return;
+
+    setLoading(true);
+    setFeedback(null);
+    setError(null);
+
+    const { error: oauthError } = await supabase.auth.signInWithOAuth({
+      provider: "github",
+      options: {
+        redirectTo: `${window.location.origin}/dashboard`
+      }
+    });
+
+    if (oauthError) {
+      setLoading(false);
+      setError(oauthError.message);
+    }
+  }
+
   if (!isConfigured) {
     return (
       <span className="rounded-full border border-white/10 px-4 py-2 text-sm text-muted">
@@ -147,6 +167,22 @@ export function AuthButton() {
         <p className="text-xs uppercase tracking-[0.3em] text-cyan-100/80">
           Supabase Auth
         </p>
+
+        <button
+          type="button"
+          onClick={() => void signInWithGitHub()}
+          disabled={loading}
+          className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full border border-white/10 bg-white/5 px-5 py-3 text-sm text-ink transition hover:border-white/20 hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          <Github className="h-4 w-4" />
+          Continue with GitHub
+        </button>
+
+        <div className="mt-4 flex items-center gap-3">
+          <div className="h-px flex-1 bg-white/10" />
+          <span className="text-xs uppercase tracking-[0.3em] text-muted">Or</span>
+          <div className="h-px flex-1 bg-white/10" />
+        </div>
 
         <form
           className="mt-4 space-y-4"

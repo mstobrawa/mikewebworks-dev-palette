@@ -13,6 +13,7 @@ import { HarmonySelector } from "@/components/harmony-selector";
 import { Modal } from "@/components/modal";
 import { PaletteStrip } from "@/components/palette-strip";
 import { UIPreview } from "@/components/ui-preview";
+import { generateSimilarPalette } from "@/lib/palette";
 import { showToast } from "@/lib/toast";
 import { copyText } from "@/lib/utils";
 import { generatePalette, paletteToSearchParam } from "@/lib/palette";
@@ -53,13 +54,22 @@ export function PaletteStudio({ initialPalette, canSave }: PaletteStudioProps) {
 
   const handleGenerate = () => {
     const nextPalette = generatePalette(mode, getLockedColors(palette));
+    applyGeneratedPalette(nextPalette);
+  };
+
+  function applyGeneratedPalette(nextPalette: Palette) {
     setPalette(nextPalette);
     setPaletteId(null);
     setHistory((current) => [nextPalette, ...current].slice(0, 8));
     const url = new URL(window.location.href);
     url.searchParams.set("palette", paletteToSearchParam(nextPalette));
     window.history.replaceState({}, "", url.toString());
-  };
+  }
+
+  function handleGenerateSimilar() {
+    const nextPalette = generateSimilarPalette(palette, getLockedColors(palette));
+    applyGeneratedPalette(nextPalette);
+  }
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -104,7 +114,7 @@ export function PaletteStudio({ initialPalette, canSave }: PaletteStudioProps) {
     setIsSaveModalOpen(false);
     setNotice({
       title: "Palette saved",
-      description: `"${saveName.trim()}" has been stored in Supabase and is ready in your dashboard.`,
+      description: "Palette saved. It is now available in your dashboard.",
     });
   }
 
@@ -202,6 +212,13 @@ export function PaletteStudio({ initialPalette, canSave }: PaletteStudioProps) {
           </div>
           <div className="flex flex-wrap gap-3 sm:items-center sm:justify-center lg:justify-end">
             <GenerateButton onClick={handleGenerate} />
+            <button
+              type="button"
+              onClick={handleGenerateSimilar}
+              className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full border border-white/10 px-4 py-3 text-sm text-muted transition hover:border-white/20 hover:text-ink"
+            >
+              Generate similar
+            </button>
             <button
               type="button"
               onClick={handleShare}

@@ -78,6 +78,12 @@ export function SavedPaletteList({ initialPalettes }: SavedPaletteListProps) {
                   </h3>
                 </Link>
                 <p className="text-sm text-muted">{formatDate(palette.created_at)}</p>
+                <Link
+                  href={`/generator?palette=${palette.id}`}
+                  className="mt-2 inline-flex text-sm text-cyan-100 transition hover:text-cyan-50"
+                >
+                  Edit in generator
+                </Link>
               </div>
               <div className="flex flex-wrap items-center gap-3">
                 <ShareLinkButton

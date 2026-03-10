@@ -3,8 +3,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, ExternalLink, Sparkles } from "lucide-react";
 import { ContrastChecker } from "@/components/contrast-checker";
+import { ExportPanel } from "@/components/export-panel";
 import { PaletteStrip } from "@/components/palette-strip";
 import { ShareLinkButton } from "@/components/share-link-button";
+import { UIPreview } from "@/components/ui-preview";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { formatDate } from "@/lib/utils";
 import type { Palette, PublicPaletteRecord } from "@/types/palette";
@@ -13,17 +15,42 @@ type PublicPalettePageProps = {
   params: Promise<{ id: string }>;
 };
 
-export async function generateMetadata(): Promise<Metadata> {
-  const title = "Color palette – Dev Palette Generator";
-  const description = "Generate UI color palettes and export them directly to CSS, SCSS, and Tailwind.";
+async function loadPalette(id: string) {
+  const supabase = createAdminClient();
+
+  if (!supabase) {
+    return null;
+  }
+
+  const { data } = await supabase
+    .from("palettes")
+    .select("id, name, colors, created_at")
+    .eq("id", id)
+    .single();
+
+  return (data as PublicPaletteRecord | null) ?? null;
+}
+
+export async function generateMetadata({ params }: PublicPalettePageProps): Promise<Metadata> {
+  const { id } = await params;
+  const palette = await loadPalette(id);
+  const title = palette ? `${palette.name} | Dev Palette Generator` : "Color palette | Dev Palette Generator";
+  const description = palette
+    ? `Explore ${palette.name}, copy HEX values, and export CSS variables or Tailwind tokens.`
+    : "Generate UI color palettes and export them directly to CSS, SCSS, and Tailwind.";
 
   return {
     title,
     description,
+    robots: {
+      index: true,
+      follow: true,
+    },
     openGraph: {
       title,
       description,
       type: "website",
+      url: `/p/${id}`,
     },
     twitter: {
       card: "summary_large_image",
@@ -35,19 +62,9 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function PublicPalettePage({ params }: PublicPalettePageProps) {
   const { id } = await params;
-  const supabase = createAdminClient();
+  const data = await loadPalette(id);
 
-  if (!supabase) {
-    notFound();
-  }
-
-  const { data, error } = await supabase
-    .from("palettes")
-    .select("id, name, colors, created_at")
-    .eq("id", id)
-    .single();
-
-  if (error || !data) {
+  if (!data) {
     notFound();
   }
 
@@ -92,6 +109,14 @@ export default async function PublicPalettePage({ params }: PublicPalettePagePro
       <section className="mt-6 px-1 sm:px-0">
         <PaletteStrip palette={colors} />
       </section>
+
+      <div className="mt-6">
+        <UIPreview palette={colors} />
+      </div>
+
+      <div className="mt-6">
+        <ExportPanel palette={colors} />
+      </div>
 
       <div className="mt-6">
         <ContrastChecker palette={colors} />

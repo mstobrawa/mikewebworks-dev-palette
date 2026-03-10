@@ -36,7 +36,7 @@ export function ContrastChecker({ palette }: ContrastCheckerProps) {
               <p className="text-sm text-muted">{check.label}</p>
               <p className="mt-3 text-2xl font-semibold text-ink">{ratio.toFixed(1)}:1</p>
               <p className={`mt-2 text-sm ${passes ? "text-cyan-100" : "text-amber-200"}`}>
-                {passes ? "✓" : "!"} {rating}
+                {passes ? "Pass" : "Alert"} {rating}
               </p>
             </article>
           );

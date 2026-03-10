@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import { SavedPaletteList } from "@/components/saved-palette-list";
 import { createClient } from "@/lib/supabase/server";
 import type { PaletteRecord } from "@/types/palette";
@@ -42,6 +43,15 @@ export default async function DashboardPage() {
         <p className="text-sm uppercase tracking-[0.3em] text-cyan-100/80">Dashboard</p>
         <h1 className="mt-4 text-4xl font-semibold text-ink">Saved palettes</h1>
         <p className="mt-3 text-sm leading-7 text-muted">Your reusable color systems, stored in Supabase and ready for client work.</p>
+      </div>
+      <div className="mb-8">
+        <Link
+          href="/generator"
+          className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-ink px-5 py-3 text-sm font-medium text-canvas transition hover:scale-[1.01] hover:shadow-[0_0_0_6px_rgba(255,255,255,0.05)]"
+        >
+          New palette
+          <ArrowRight className="h-4 w-4" />
+        </Link>
       </div>
       <SavedPaletteList initialPalettes={(data as PaletteRecord[]) ?? []} />
     </div>

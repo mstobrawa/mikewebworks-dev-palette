@@ -1,3 +1,4 @@
+import { getReadableTextColor } from "@/lib/palette";
 import type { Palette } from "@/types/palette";
 
 type UIPreviewProps = {
@@ -5,6 +6,9 @@ type UIPreviewProps = {
 };
 
 export function UIPreview({ palette }: UIPreviewProps) {
+  const primaryText = getReadableTextColor(palette.primary);
+  const accentText = getReadableTextColor(palette.accent);
+
   return (
     <section className="overflow-hidden rounded-[2rem] border border-white/10 shadow-panel">
       <div className="border-b border-white/10 px-6 py-4 text-sm text-muted" style={{ backgroundColor: palette.background }}>
@@ -22,7 +26,7 @@ export function UIPreview({ palette }: UIPreviewProps) {
           <button
             type="button"
             className="rounded-full px-4 py-2 text-sm font-medium"
-            style={{ backgroundColor: palette.primary, color: palette.background }}
+            style={{ backgroundColor: palette.primary, color: primaryText }}
           >
             New palette
           </button>
@@ -44,7 +48,7 @@ export function UIPreview({ palette }: UIPreviewProps) {
               <button
                 type="button"
                 className="rounded-full px-5 py-3 text-sm font-medium"
-                style={{ backgroundColor: palette.primary, color: palette.background }}
+                style={{ backgroundColor: palette.primary, color: primaryText }}
               >
                 Primary button
               </button>
@@ -67,7 +71,7 @@ export function UIPreview({ palette }: UIPreviewProps) {
               Accent highlights show alert states, focus rings, badges, and lightweight data visualization.
             </p>
             <div className="mt-5 flex gap-2">
-              <span className="rounded-full px-3 py-1 text-xs font-medium" style={{ backgroundColor: palette.accent, color: palette.background }}>
+              <span className="rounded-full px-3 py-1 text-xs font-medium" style={{ backgroundColor: palette.accent, color: accentText }}>
                 Accent
               </span>
               <span className="rounded-full border px-3 py-1 text-xs" style={{ borderColor: `${palette.text}20` }}>
