@@ -5,15 +5,16 @@ import { Footer } from "@/components/footer";
 import { SiteNavbar } from "@/components/site-navbar";
 import { ToastHost } from "@/components/toast-host";
 import { cn, getAppBaseUrl } from "@/lib/utils";
+import { Analytics } from "@vercel/analytics/next";
 
 const sans = Space_Grotesk({
   subsets: ["latin"],
-  variable: "--font-sans"
+  variable: "--font-sans",
 });
 
 const mono = JetBrains_Mono({
   subsets: ["latin"],
-  variable: "--font-mono"
+  variable: "--font-mono",
 });
 
 export const metadata: Metadata = {
@@ -22,7 +23,8 @@ export const metadata: Metadata = {
     default: "Dev Palette Generator",
     template: "%s | Dev Palette Generator",
   },
-  description: "Generate UI color palettes and export them to Tailwind, CSS variables or design tokens.",
+  description:
+    "Generate UI color palettes and export them to Tailwind, CSS variables or design tokens.",
   alternates: {
     canonical: "/",
   },
@@ -32,7 +34,8 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "Dev Palette Generator",
-    description: "Generate UI color palettes and export them to Tailwind, CSS variables or design tokens.",
+    description:
+      "Generate UI color palettes and export them to Tailwind, CSS variables or design tokens.",
     url: getAppBaseUrl(),
     siteName: "Dev Palette Generator",
     images: [
@@ -47,7 +50,8 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Dev Palette Generator",
-    description: "Generate UI color palettes and export them to Tailwind or CSS variables.",
+    description:
+      "Generate UI color palettes and export them to Tailwind or CSS variables.",
     images: ["/opengraph-image"],
   },
   icons: {
@@ -55,7 +59,9 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default function RootLayout({
+  children,
+}: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={cn(sans.variable, mono.variable)}>
       <body className="font-[var(--font-sans)] antialiased">
@@ -65,6 +71,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           <Footer />
         </div>
         <ToastHost />
+        <Analytics />
       </body>
     </html>
   );
