@@ -7,8 +7,13 @@ type Hsl = {
   l: number;
 };
 
-const LIGHTNESS_CURVE = [92, 75, 58, 42, 18] as const;
+const LIGHT_CURVE = [92, 75, 58, 42, 18] as const;
+const DARK_CURVE = [10, 22, 40, 60, 90] as const;
 const tailwindStops = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900] as const;
+
+function getLightnessCurve() {
+  return Math.random() < 0.5 ? LIGHT_CURVE : DARK_CURVE;
+}
 
 function randomInt(min: number, max: number) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -143,6 +148,7 @@ function ensureReadableText(background: string, preferredText?: string) {
 }
 
 function buildPalette(baseHue: number, mode: HarmonyMode): Palette {
+  const LIGHTNESS_CURVE = getLightnessCurve();
   const offsets = getHueOffsets(mode);
   const neutralHue = wrapHue(baseHue + randomInt(-18, 18));
   const accentHue =
