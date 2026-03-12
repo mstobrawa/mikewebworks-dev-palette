@@ -150,36 +150,14 @@ export function PaletteStudio({ initialPalette, canSave }: PaletteStudioProps) {
   }
 
   async function sharePalette() {
-    const response = await fetch("/api/palettes", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        name: "Shared palette",
-        colors: palette,
-      }),
-    });
-
-    if (!response.ok) {
-      showToast("Failed to create share link");
-      return;
-    }
-
-    const data = (await response.json()) as { id?: string };
-    const nextId = data.id ?? null;
-
-    if (!nextId) {
-      showToast("Failed to create share link");
-      return;
-    }
-
-    const shareUrl = `${window.location.origin}/p/${nextId}`;
+    const shareUrl = `${window.location.origin}/generator?palette=${paletteToSearchParam(palette)}`;
     const copied = await copyText(shareUrl);
+
     if (!copied) {
       showToast("Failed to create share link");
       return;
     }
+
     showToast("Link copied!");
   }
 
